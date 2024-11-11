@@ -140,10 +140,13 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 soul = Jugador()
 
-plataforma1 = Plataforma(0, screen.get_height() - 20, screen.get_width(), 20)
-plataforma2 = Plataforma(100, screen.get_height() - 40, 100, 40)
-plataforma3 = Plataforma(200, screen.get_height() - 100, 100, 10)
-
+lista_plataformas = [
+    [0, screen.get_height() - 20, screen.get_width()*10, 4000],#Piso del nivel
+    [-500,-500,500,screen.get_height() + 1000],#pared izquierda
+    [100, screen.get_height() - 40, 100, 40],
+    [200, screen.get_height() - 100, 100, 10],
+    [screen.get_width()*10, screen.get_height()+2000, screen.get_width()*10, 2000],#Piso del nivel 2
+]
 def comenzar_juego():
     global estado_actual_pantalla
     estado_actual_pantalla = PANTALLA_JUEGO
@@ -170,15 +173,15 @@ mensaje_presentacion_posicion = mensaje_presentacion.get_rect(center=(screen.get
 
 
 todos_sprites = pygame.sprite.Group()
-todos_sprites.add(soul)
-todos_sprites.add(plataforma1)
-todos_sprites.add(plataforma2)
-todos_sprites.add(plataforma3)
-
 plataformas = pygame.sprite.Group()
-plataformas.add(plataforma1)
-plataformas.add(plataforma2)
-plataformas.add(plataforma3)
+todos_sprites.add(soul)
+
+for plataforma in  lista_plataformas:
+    p = Plataforma(plataforma[0], plataforma[1], plataforma[2], plataforma[3])
+    todos_sprites.add(p)
+    plataformas.add(p)
+
+
 
 # Configuración de fuentes
 fuente_grande = pygame.font.Font(None, 48)
