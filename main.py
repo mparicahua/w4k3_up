@@ -219,11 +219,16 @@ while running:
             soul.moverDerecha()
 
         camera_x = soul.rect.centerx - WIDTH // 2
-
+        camera_y = soul.rect.centery - HEIGHT // (6/5)
 
         todos_sprites.update()
+        espacio_linea = 0
         for sprite in todos_sprites:
-            screen.blit(sprite.imagen, (sprite.rect.x - camera_x, sprite.rect.y))
+            
+            screen.blit(sprite.imagen, (sprite.rect.x - camera_x, sprite.rect.y - camera_y))
+            pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
+            screen.blit(pos_texto, (400, 10 + espacio_linea)) 
+            espacio_linea += 20
         #Variables en tiempo real
         if soul.doble_salto_habilitado:
             estado = "Doble Salto: Activado"
@@ -241,6 +246,8 @@ while running:
         screen.blit(texto_estado, (10, 50))
         pos_texto = fuente_pequeña.render(f"Camara X: {camera_x}", True, (100, 100, 100))
         screen.blit(pos_texto, (10, 70)) 
+        pos_texto = fuente_pequeña.render(f"Camara Y: {camera_y}", True, (100, 100, 100))
+        screen.blit(pos_texto, (10, 90)) 
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
