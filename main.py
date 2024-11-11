@@ -241,9 +241,11 @@ while running:
         todos_sprites.update()
         espacio_linea = 0
         for sprite in todos_sprites:
+            #coregir bug visual de volver quitar seguimiento x o y
             sprite.rect.x = sprite.rect.x - camera_x
             sprite.rect.y = sprite.rect.y - camera_y
             screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
+            ###############################################################
             pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
             screen.blit(pos_texto, (400, 10 + espacio_linea)) 
             espacio_linea += 20
