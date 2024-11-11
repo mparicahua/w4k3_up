@@ -31,8 +31,8 @@ class Jugador(pygame.sprite.Sprite):
         self.rect.x += self.velocidad_x
         
 
-        lista_coliciones_plataformas = pygame.sprite.spritecollide(self, plataformas, False)
-        for plataforma in lista_coliciones_plataformas:
+        lista_coliciones_plataformas_verticales = pygame.sprite.spritecollide(self, plataformas, False)
+        for plataforma in lista_coliciones_plataformas_verticales:
             if self.velocidad_x > 0:
                 self.rect.right = plataforma.rect.left
             elif self.velocidad_x < 0:
@@ -41,8 +41,8 @@ class Jugador(pygame.sprite.Sprite):
         # Mover verticalmente
         self.rect.y += self.velocidad_y
 
-        lista_coliciones_plataformas = pygame.sprite.spritecollide(self, plataformas, False)
-        for plataforma in lista_coliciones_plataformas:
+        lista_coliciones_plataformas_horizontales = pygame.sprite.spritecollide(self, plataformas, False)
+        for plataforma in lista_coliciones_plataformas_horizontales:
             if self.velocidad_y > 0:
                 self.rect.bottom = plataforma.rect.top
                 self.saltando = False
