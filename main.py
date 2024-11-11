@@ -178,6 +178,7 @@ fuente_grande = pygame.font.Font(None, 48)
 fuente_normal = pygame.font.Font(None, 36)
 fuente_pequeña = pygame.font.Font(None, 24) 
 
+camera_x = 0
 clock = pygame.time.Clock()
 running = True
 
@@ -217,10 +218,13 @@ while running:
         if keys[pygame.K_RIGHT]:
             soul.moverDerecha()
 
+        camera_x = soul.rect.centerx - WIDTH // 2
+
+
         todos_sprites.update()
         for sprite in todos_sprites:
-            screen.blit(sprite.imagen, (sprite.rect.x, sprite.rect.y))
-
+            screen.blit(sprite.imagen, (sprite.rect.x - camera_x, sprite.rect.y))
+        #Variables en tiempo real
         if soul.doble_salto_habilitado:
             estado = "Doble Salto: Activado"
             color = (0, 255, 0)
@@ -228,12 +232,15 @@ while running:
             estado = "Doble Salto: Desactivado"
             color = (255, 0, 0)
 
-        texto_estado = fuente_pequeña.render(estado, True, color)
-        screen.blit(texto_estado, (10, 50))
+        
         pos_texto = fuente_pequeña.render(f"X: {soul.rect.x}, Y: {soul.rect.y}", True, (100, 100, 100))
         screen.blit(pos_texto, (10, 10)) 
         pos_texto = fuente_pequeña.render(f"Velocidad X: {soul.velocidad_x}, Velocidad Y: {soul.velocidad_y}", True, (100, 100, 100))
         screen.blit(pos_texto, (10, 30)) 
+        texto_estado = fuente_pequeña.render(estado, True, color)
+        screen.blit(texto_estado, (10, 50))
+        pos_texto = fuente_pequeña.render(f"Camara X: {camera_x}", True, (100, 100, 100))
+        screen.blit(pos_texto, (10, 70)) 
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
