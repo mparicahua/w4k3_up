@@ -14,14 +14,17 @@ class Jugador(pygame.sprite.Sprite):
         self.velocidad_x = 0
         self.velocidad_y = 0
         self.mirando_derecha = True
-        # Pruebas de doble salto
-        #####################################
         self.doble_salto_disponible = True
-        self.doble_salto_habilitado = False  
-        #####################################
+        self.doble_salto_habilitado = False 
+        self.seguimiento_camara_y = True 
+        self.seguimiento_camara_x = True 
     
     def activar_doble_salto(self):
         self.doble_salto_habilitado = not self.doble_salto_habilitado
+    def activar_seguimeinto_camara_y(self):
+        self.seguimiento_camara_y = not self.seguimiento_camara_y
+    def activar_seguimeinto_camara_x(self):
+        self.seguimiento_camara_x = not self.seguimiento_camara_x
 
     def update(self):
         self.velocidad_y += 0.5  # Gravedad
@@ -47,8 +50,8 @@ class Jugador(pygame.sprite.Sprite):
                 self.rect.bottom = plataforma.rect.top
                 self.saltando = False
                 self.doble_salto_disponible = True
-            # elif self.velocidad_y < 0:
-            #     self.rect.top = plataforma.rect.bottom
+            elif self.velocidad_y < 0:
+                self.rect.top = plataforma.rect.bottom
             self.velocidad_y = 0
         
     def saltar(self):
@@ -139,6 +142,7 @@ soul = Jugador()
 
 plataforma1 = Plataforma(0, screen.get_height() - 20, screen.get_width(), 20)
 plataforma2 = Plataforma(100, screen.get_height() - 40, 100, 40)
+plataforma3 = Plataforma(200, screen.get_height() - 100, 100, 10)
 
 def comenzar_juego():
     global estado_actual_pantalla
@@ -169,9 +173,12 @@ todos_sprites = pygame.sprite.Group()
 todos_sprites.add(soul)
 todos_sprites.add(plataforma1)
 todos_sprites.add(plataforma2)
+todos_sprites.add(plataforma3)
+
 plataformas = pygame.sprite.Group()
 plataformas.add(plataforma1)
 plataformas.add(plataforma2)
+plataformas.add(plataforma3)
 
 # Configuración de fuentes
 fuente_grande = pygame.font.Font(None, 48)
@@ -179,6 +186,9 @@ fuente_normal = pygame.font.Font(None, 36)
 fuente_pequeña = pygame.font.Font(None, 24) 
 
 camera_x = 0
+camera_y = 0
+
+habilitar_camara_y = True
 clock = pygame.time.Clock()
 running = True
 
@@ -191,6 +201,10 @@ while running:
                 soul.saltar()
             if event.key == pygame.K_z:
                 soul.activar_doble_salto()
+            if event.key == pygame.K_x:
+                soul.activar_seguimeinto_camara_x()
+            if event.key == pygame.K_c:
+                soul.activar_seguimeinto_camara_y()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 soul.detenerse()
@@ -218,8 +232,8 @@ while running:
         if keys[pygame.K_RIGHT]:
             soul.moverDerecha()
 
-        camera_x = soul.rect.centerx - WIDTH // 2
-        camera_y = soul.rect.centery - HEIGHT // (6/5)
+        camera_x = (soul.rect.centerx - WIDTH // 2) if soul.seguimiento_camara_x else 0
+        camera_y = soul.rect.centery - HEIGHT // (6/5) if soul.seguimiento_camara_y else 0
 
         todos_sprites.update()
         espacio_linea = 0
@@ -236,18 +250,37 @@ while running:
         else:
             estado = "Doble Salto: Desactivado"
             color = (255, 0, 0)
+        if soul.seguimiento_camara_x:
+            estado_camara_x = "Seguimiento Camara X: Activado"
+            color_camara_x = (0, 255, 0)
+        else:
+            estado_camara_x = "Seguimiento Camara X: Desactivado"
+            color_camara_x = (255, 0, 0)
+        if soul.seguimiento_camara_y:
+            estado_camara_y = "Seguimiento Camara Y: Activado"
+            color_camara_y = (0, 255, 0)
+        else:
+            estado_camara_y = "Seguimiento Camara Y: Desactivado"
+            color_camara_y = (255, 0, 0)
 
         
         pos_texto = fuente_pequeña.render(f"X: {soul.rect.x}, Y: {soul.rect.y}", True, (100, 100, 100))
         screen.blit(pos_texto, (10, 10)) 
         pos_texto = fuente_pequeña.render(f"Velocidad X: {soul.velocidad_x}, Velocidad Y: {soul.velocidad_y}", True, (100, 100, 100))
-        screen.blit(pos_texto, (10, 30)) 
+        screen.blit(pos_texto, (10, 30))
+
         texto_estado = fuente_pequeña.render(estado, True, color)
         screen.blit(texto_estado, (10, 50))
+        texto_estado = fuente_pequeña.render(estado_camara_x, True, color_camara_x)
+        screen.blit(texto_estado, (10, 70))
+        texto_estado = fuente_pequeña.render(estado_camara_y, True, color_camara_y)
+        screen.blit(texto_estado, (10, 90))
+
+
         pos_texto = fuente_pequeña.render(f"Camara X: {camera_x}", True, (100, 100, 100))
-        screen.blit(pos_texto, (10, 70)) 
+        screen.blit(pos_texto, (10, 110)) 
         pos_texto = fuente_pequeña.render(f"Camara Y: {camera_y}", True, (100, 100, 100))
-        screen.blit(pos_texto, (10, 90)) 
+        screen.blit(pos_texto, (10, 130)) 
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
