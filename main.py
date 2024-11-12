@@ -5,8 +5,27 @@ pygame.init()
 class Jugador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.imagen = pygame.Surface((30, 50))
-        self.imagen.fill((0, 255, 100))
+        self.animaciones = [[],[],[]]
+        for i in range(12):
+            img = pygame.image.load(f"assets//imagenes//personajes//caballero//corriendo//frame{i + 1}.png")
+            rect = pygame.Rect(30, 40, 50, 55)
+            sprite_recortado = img.subsurface(rect)
+            self.animaciones[0].append(sprite_recortado)
+        for i in range(4):
+            img = pygame.image.load(f"assets//imagenes//personajes//caballero//parado//frame{i + 1}.png")
+            rect = pygame.Rect(30, 40, 50, 55)
+            sprite_recortado = img.subsurface(rect)
+            self.animaciones[1].append(sprite_recortado)
+        for i in range(4):
+            img = pygame.image.load(f"assets//imagenes//personajes//caballero//saltando//frame{i + 1}.png")
+            rect = pygame.Rect(30, 40, 50, 55)
+            sprite_recortado = img.subsurface(rect)
+            self.animaciones[2].append(sprite_recortado)
+        self.frame_index = [1,1,1]
+        self.update_time = [pygame.time.get_ticks(),pygame.time.get_ticks(),pygame.time.get_ticks()]
+        self.imagen = self.animaciones[1][self.frame_index[1]]
+        #self.imagen.fill((0, 255, 100))
+        self.flip= False
         self.saltando = False
         self.rect = self.imagen.get_rect()
         self.rect.x = 50
@@ -27,6 +46,24 @@ class Jugador(pygame.sprite.Sprite):
         self.seguimiento_camara_x = not self.seguimiento_camara_x
 
     def update(self):
+        #Animaciones
+        cooldown_animacion = 100
+        if self.saltando:
+            self.imagen = self.animaciones[2][self.frame_index[2]]
+        else:
+            if  self.velocidad_x != 0:
+                self.imagen = self.animaciones[0][self.frame_index[0]]
+            else :
+                self.imagen = self.animaciones[1][self.frame_index[1]]
+            
+        for i in range (3):
+            if pygame.time.get_ticks() - self.update_time[i] >= cooldown_animacion:
+                self.frame_index[i] = self.frame_index[i] + 1
+                self.update_time[i] = pygame.time.get_ticks()
+            if self.frame_index[i] >= len(self.animaciones[i]):
+                self.frame_index[i] = 1 
+        #################################################
+
         self.velocidad_y += 0.5  # Gravedad
         if self.velocidad_y > 10:  # Velocidad terminal
             self.velocidad_y = 10
@@ -53,7 +90,6 @@ class Jugador(pygame.sprite.Sprite):
             elif self.velocidad_y < 0:
                 self.rect.top = plataforma.rect.bottom
             self.velocidad_y = 0
-        
     def saltar(self):
         if self.saltando == False:
             self.velocidad_y = -10
@@ -64,9 +100,11 @@ class Jugador(pygame.sprite.Sprite):
     def moverIzquierda(self):
         self.velocidad_x = -5
         self.mirando_derecha = False
+        self.flip =True
     def moverDerecha(self):
         self.velocidad_x = 5
         self.mirando_derecha = True
+        self.flip = False
     def detenerse(self):
         self.velocidad_x = 0
 class Rectangulo(pygame.sprite.Sprite):
@@ -144,7 +182,7 @@ lista_plataformas = [
     [0, screen.get_height() - 20, screen.get_width()*10, 4000],#Piso del nivel
     [-500,-500,500,screen.get_height() + 1000],#pared izquierda
     [100, screen.get_height() - 40, 100, 40],
-    [200, screen.get_height() - 100, 100, 10],
+    [200, screen.get_height() - 120, 100, 10],
     [screen.get_width()*10, screen.get_height()+2000, screen.get_width()*10, 2000],#Piso del nivel 2
 ]
 def comenzar_juego():
@@ -154,8 +192,6 @@ def comenzar_juego():
 def terminar_juego():
     pygame.quit()
     sys.exit()
-
-
 
 # Configuración del menú principal
 menu_items = [
@@ -191,7 +227,7 @@ fuente_pequeña = pygame.font.Font(None, 24)
 camera_x = 0
 camera_y = 0
 
-habilitar_camara_y = True
+
 clock = pygame.time.Clock()
 running = True
 
@@ -236,15 +272,23 @@ while running:
             soul.moverDerecha()
 
         camera_x = (soul.rect.centerx - WIDTH // 2) if soul.seguimiento_camara_x else 0
-        camera_y = soul.rect.centery - HEIGHT // (6/5) if soul.seguimiento_camara_y else 0
-
+        camera_y = (soul.rect.centery - HEIGHT // (6/5)) if soul.seguimiento_camara_y else 0
+        
         todos_sprites.update()
         espacio_linea = 0
+        
+        
         for sprite in todos_sprites:
             #coregir bug visual de volver quitar seguimiento x o y
             sprite.rect.x = sprite.rect.x - camera_x
             sprite.rect.y = sprite.rect.y - camera_y
-            screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
+
+            if hasattr(sprite, 'flip'):
+                imagen_flip = pygame.transform.flip(sprite.imagen,sprite.flip,False)
+                screen.blit(imagen_flip, (sprite.rect.x , sprite.rect.y ))
+            else:
+                screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
+            
             ###############################################################
             pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
             screen.blit(pos_texto, (400, 10 + espacio_linea)) 
