@@ -128,7 +128,7 @@ class Plataforma(pygame.sprite.Sprite):
     def __init__(self,x,y,ancho,alto):
         super().__init__()
         self.imagen = pygame.Surface((ancho, alto))
-        self.imagen.fill((0, 255, 0))
+        self.imagen.fill((0, 0, 0))
         self.rect = self.imagen.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -216,6 +216,8 @@ for plataforma in  lista_plataformas:
     todos_sprites.add(p)
     plataformas.add(p)
 
+pygame.mixer.music.load("assets/musica/Other World.mp3")
+pygame.mixer.music.play(100)
 
 
 # Configuración de fuentes
