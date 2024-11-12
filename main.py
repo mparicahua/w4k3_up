@@ -1,7 +1,6 @@
 import pygame
 import sys
 pygame.init()
-
 class Jugador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
