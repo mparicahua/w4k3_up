@@ -4,31 +4,15 @@ pygame.init()
 class Jugador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.animaciones = [[],[],[]]
-        # self.animaciones = {"corriendo": {"frames":[],"frameIndex":1,"numeroFrames":6,"cooldownAnimacion":100},
-        #                     "parado": {"frames":[],"frameIndex":1,"numeroFrames":17,"cooldownAnimacion":100},
-        #                     "saltando": {"frames":[],"frameIndex":1,"numeroFrames":5,"cooldownAnimacion":200}
-        #                     }
-        # self.cargar_animacion()
-        for i in range(6):
-            img = pygame.image.load(f"assets//imagenes//personajes//soul//corriendo//frame{i}.png")
-            rect = pygame.Rect(53, 44, 45, 66)
-            sprite_recortado = img.subsurface(rect)
-            self.animaciones[0].append(sprite_recortado)
-        for i in range(17):
-            img = pygame.image.load(f"assets//imagenes//personajes//soul//parado//frame{i}.png")
-            rect = pygame.Rect(53, 44, 45, 66)
-            sprite_recortado = img.subsurface(rect)
-            self.animaciones[1].append(sprite_recortado)
-        for i in range(5):
-            img = pygame.image.load(f"assets//imagenes//personajes//soul//saltando//frame{i}.png")
-            rect = pygame.Rect(53, 44, 45, 66)
-            sprite_recortado = img.subsurface(rect)
-            self.animaciones[2].append(sprite_recortado)
-        self.frame_index = [1,1,1]
-        self.update_time = [pygame.time.get_ticks(),pygame.time.get_ticks(),pygame.time.get_ticks()]
-        self.imagen = self.animaciones[1][self.frame_index[1]]
+        self.animaciones = {"corriendo": {"frames":[],"frameIndex":1,"numeroFrames":6,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":""},
+                            "parado": {"frames":[],"frameIndex":1,"numeroFrames":17,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":""},
+                            "saltando": {"frames":[],"frameIndex":1,"numeroFrames":5,"cooldownAnimacion":200,"actualizado_fecha":pygame.time.get_ticks(),"tipo":""},
+                            "dasheando": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D"}
+                            }
+        self.cargar_animacion()
+        self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
         #self.imagen.fill((0, 255, 100))
+        
         self.flip= False
         self.saltando = False
         self.rect = self.imagen.get_rect()
@@ -50,14 +34,25 @@ class Jugador(pygame.sprite.Sprite):
         self.dash_duracion = 0
         self.dash_velocidad = 15
         ##########################
+
+        pygame.draw.rect(
+            self.imagen,
+            (0, 255, 0),
+            self.rect,
+            50
+        )
     def cargar_animacion(self):
         for nombre_animacion in self.animaciones.keys():
             for i in range(self.animaciones[nombre_animacion]["numeroFrames"]):
                 img = pygame.image.load(f"assets/imagenes/personajes/soul/{nombre_animacion}/frame{i}.png")
-                rect = pygame.Rect(53, 44, 45, 66)
-                sprite_recortado = img.subsurface(rect)
-                self.animaciones[nombre_animacion]["frames"].append(sprite_recortado)
-        
+                if  self.animaciones[nombre_animacion]["tipo"] =="D":
+                    rect = pygame.Rect(45, 44, 105, 66)
+                    sprite_recortado = img.subsurface(rect)
+                    self.animaciones[nombre_animacion]["frames"].append(sprite_recortado)
+                else:
+                    rect = pygame.Rect(53, 44, 45, 66)
+                    sprite_recortado = img.subsurface(rect)
+                    self.animaciones[nombre_animacion]["frames"].append(sprite_recortado)
     def activar_doble_salto(self):
         self.doble_salto_habilitado = not self.doble_salto_habilitado
     def activar_dash(self):
@@ -69,21 +64,24 @@ class Jugador(pygame.sprite.Sprite):
 
     def update(self):
         #Animaciones
-        cooldown_animacion = 100
         if self.saltando:
-            self.imagen = self.animaciones[2][self.frame_index[2]]
+            self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
         else:
             if  self.velocidad_x != 0:
-                self.imagen = self.animaciones[0][self.frame_index[0]]
+                self.imagen = self.animaciones["corriendo"]["frames"][self.animaciones["corriendo"]["frameIndex"]]
             else :
-                self.imagen = self.animaciones[1][self.frame_index[1]]
+                self.imagen = self.animaciones["parado"]["frames"][self.animaciones["parado"]["frameIndex"]]
+        if self.puede_dash == False:
+            self.imagen = self.animaciones["dasheando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
+
             
-        for i in range (3):
-            if pygame.time.get_ticks() - self.update_time[i] >= cooldown_animacion:
-                self.frame_index[i] = self.frame_index[i] + 1
-                self.update_time[i] = pygame.time.get_ticks()
-            if self.frame_index[i] >= len(self.animaciones[i]):
-                self.frame_index[i] = 1 
+        for nombre_animacion in self.animaciones.keys():
+            if pygame.time.get_ticks() - self.animaciones[nombre_animacion]["actualizado_fecha"] >= self.animaciones[nombre_animacion]["cooldownAnimacion"]:
+                self.animaciones[nombre_animacion]["frameIndex"] += 1
+                self.animaciones[nombre_animacion]["actualizado_fecha"] = pygame.time.get_ticks()
+            if self.animaciones[nombre_animacion]["frameIndex"] >= len(self.animaciones[nombre_animacion]["frames"]):
+                self.animaciones[nombre_animacion]["frameIndex"]  = 1 
+        
         #################################################
         # Actualizar dash
         if self.dash_duracion > 0:
@@ -375,9 +373,9 @@ while running:
                 screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
             
             ###############################################################
-            # pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
-            # screen.blit(pos_texto, (400, 10 + espacio_linea)) 
-            # espacio_linea += 20
+            pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
+            screen.blit(pos_texto, (400, 10 + espacio_linea)) 
+            espacio_linea += 20
         #Variables en tiempo real
         if soul.doble_salto_habilitado:
             estado = "Doble Salto: Activado"
