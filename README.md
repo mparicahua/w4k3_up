@@ -1,5 +1,5 @@
 
-# Juego Wape up
+# Juego Wake up
 
 Es un juego creado en pygame usando clases y herencias
 
