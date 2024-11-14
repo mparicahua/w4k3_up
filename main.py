@@ -5,19 +5,24 @@ class Jugador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.animaciones = [[],[],[]]
-        for i in range(12):
-            img = pygame.image.load(f"assets//imagenes//personajes//caballero//corriendo//frame{i + 1}.png")
-            rect = pygame.Rect(30, 40, 50, 55)
+        # self.animaciones = {"corriendo": {"frames":[],"frameIndex":1,"numeroFrames":6,"cooldownAnimacion":100},
+        #                     "parado": {"frames":[],"frameIndex":1,"numeroFrames":17,"cooldownAnimacion":100},
+        #                     "saltando": {"frames":[],"frameIndex":1,"numeroFrames":5,"cooldownAnimacion":200}
+        #                     }
+        # self.cargar_animacion()
+        for i in range(6):
+            img = pygame.image.load(f"assets//imagenes//personajes//soul//corriendo//frame{i}.png")
+            rect = pygame.Rect(53, 44, 45, 66)
             sprite_recortado = img.subsurface(rect)
             self.animaciones[0].append(sprite_recortado)
-        for i in range(4):
-            img = pygame.image.load(f"assets//imagenes//personajes//caballero//parado//frame{i + 1}.png")
-            rect = pygame.Rect(30, 40, 50, 55)
+        for i in range(17):
+            img = pygame.image.load(f"assets//imagenes//personajes//soul//parado//frame{i}.png")
+            rect = pygame.Rect(53, 44, 45, 66)
             sprite_recortado = img.subsurface(rect)
             self.animaciones[1].append(sprite_recortado)
-        for i in range(4):
-            img = pygame.image.load(f"assets//imagenes//personajes//caballero//saltando//frame{i + 1}.png")
-            rect = pygame.Rect(30, 40, 50, 55)
+        for i in range(5):
+            img = pygame.image.load(f"assets//imagenes//personajes//soul//saltando//frame{i}.png")
+            rect = pygame.Rect(53, 44, 45, 66)
             sprite_recortado = img.subsurface(rect)
             self.animaciones[2].append(sprite_recortado)
         self.frame_index = [1,1,1]
@@ -32,13 +37,31 @@ class Jugador(pygame.sprite.Sprite):
         self.velocidad_x = 0
         self.velocidad_y = 0
         self.mirando_derecha = True
+
         self.doble_salto_disponible = True
         self.doble_salto_habilitado = False 
         self.seguimiento_camara_y = True 
         self.seguimiento_camara_x = True 
-    
+
+        #Pruebas dash
+        self.dash_habilitado = False
+        self.puede_dash = True
+        self.dash_cooldown = 0
+        self.dash_duracion = 0
+        self.dash_velocidad = 15
+        ##########################
+    def cargar_animacion(self):
+        for nombre_animacion in self.animaciones.keys():
+            for i in range(self.animaciones[nombre_animacion]["numeroFrames"]):
+                img = pygame.image.load(f"assets/imagenes/personajes/soul/{nombre_animacion}/frame{i}.png")
+                rect = pygame.Rect(53, 44, 45, 66)
+                sprite_recortado = img.subsurface(rect)
+                self.animaciones[nombre_animacion]["frames"].append(sprite_recortado)
+        
     def activar_doble_salto(self):
         self.doble_salto_habilitado = not self.doble_salto_habilitado
+    def activar_dash(self):
+        self.dash_habilitado = not self.dash_habilitado
     def activar_seguimeinto_camara_y(self):
         self.seguimiento_camara_y = not self.seguimiento_camara_y
     def activar_seguimeinto_camara_x(self):
@@ -62,6 +85,18 @@ class Jugador(pygame.sprite.Sprite):
             if self.frame_index[i] >= len(self.animaciones[i]):
                 self.frame_index[i] = 1 
         #################################################
+        # Actualizar dash
+        if self.dash_duracion > 0:
+            self.dash_duracion -= 1
+            if self.dash_duracion <= 0:
+                self.velocidad_x = 0
+        
+        # Actualizar cooldown del dash
+        if self.dash_cooldown > 0:
+            self.dash_cooldown -= 1
+            if self.dash_cooldown <= 0:
+                self.puede_dash = True
+
 
         self.velocidad_y += 0.5  # Gravedad
         if self.velocidad_y > 10:  # Velocidad terminal
@@ -96,16 +131,31 @@ class Jugador(pygame.sprite.Sprite):
         elif self.doble_salto_habilitado and self.doble_salto_disponible:  # Doble salto
             self.velocidad_y = -10
             self.doble_salto_disponible = False
+    def ejecutar_dash(self):
+        if self.dash_habilitado and self.puede_dash:
+            self.dash_duracion = 10  # Duración del dash en frames
+            self.puede_dash = False
+            self.dash_cooldown = 30  # Cooldown del dash en frames
+            # Velocidad del dash según la dirección
+            if self.mirando_derecha:
+                self.velocidad_x = self.dash_velocidad
+            else:
+                self.velocidad_x = -self.dash_velocidad
+            # Reducir la velocidad vertical durante el dash
+            self.velocidad_y *= 0.3
     def moverIzquierda(self):
-        self.velocidad_x = -5
-        self.mirando_derecha = False
-        self.flip =True
+        if self.dash_duracion <= 0:
+            self.velocidad_x = -5
+            self.mirando_derecha = False
+            self.flip =True
     def moverDerecha(self):
-        self.velocidad_x = 5
-        self.mirando_derecha = True
-        self.flip = False
+        if self.dash_duracion <= 0: 
+            self.velocidad_x = 5
+            self.mirando_derecha = True
+            self.flip = False
     def detenerse(self):
-        self.velocidad_x = 0
+        if self.dash_duracion <= 0:
+            self.velocidad_x = 0
 class Rectangulo(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -132,6 +182,11 @@ class Plataforma(pygame.sprite.Sprite):
         self.rect = self.imagen.get_rect()
         self.rect.x = x
         self.rect.y = y
+    def crear_plataforma(x, y, ancho, alto): 
+   
+        nueva_plataforma = Plataforma(x, y, ancho, alto)
+        todos_sprites.add(nueva_plataforma)
+        plataformas.add(nueva_plataforma)
 class MenuItem:
     def __init__(self, texto, position, callback):
         self.texto_normal = gothic_menu.render(texto, True, GRAY)
@@ -215,6 +270,31 @@ for plataforma in  lista_plataformas:
     p = Plataforma(plataforma[0], plataforma[1], plataforma[2], plataforma[3])
     todos_sprites.add(p)
     plataformas.add(p)
+Plataforma.crear_plataforma(140,500, 140,20) #1
+Plataforma.crear_plataforma(490,500, 70, 100 ) #2
+Plataforma.crear_plataforma(560,420,140,200) #3
+Plataforma.crear_plataforma(630,280,70,20) #4
+Plataforma.crear_plataforma(420,180,280,20) #5
+Plataforma.crear_plataforma(0,180, 280, 20) #6
+Plataforma.crear_plataforma(140,80,140,20)#7
+Plataforma.crear_plataforma(350,0, 140, 20) # plataforma del medio y = 0 #8
+Plataforma.crear_plataforma(560, -80, 140, 20) #9
+Plataforma.crear_plataforma(350,-160, 140, 20) #10
+Plataforma.crear_plataforma(140, -240, 70, 20) #11
+Plataforma.crear_plataforma(630,-240, 70,20) #12
+Plataforma.crear_plataforma(910, -80,70,20) #13
+Plataforma.crear_plataforma(1120, -160,70,20) #14
+Plataforma.crear_plataforma(1330, -240,70,20) #15
+Plataforma.crear_plataforma(1540, -160,70,20) #16
+Plataforma.crear_plataforma(1750, -240,70,20) #17
+Plataforma.crear_plataforma(1260,500,70,120) #18
+Plataforma.crear_plataforma(1330,280,70,20) #19
+Plataforma.crear_plataforma(1540,200,70,20) #20
+Plataforma.crear_plataforma(1750, 120,70,20) #21
+Plataforma.crear_plataforma(1820,420,140,20) #22
+#plataformas verticales ancho < alto
+Plataforma.crear_plataforma(350,180,70,300) #23
+Plataforma.crear_plataforma(770,-240, 70,720) #24
 
 pygame.mixer.music.load("assets/musica/Other World.mp3")
 pygame.mixer.music.play(100)
@@ -245,6 +325,10 @@ while running:
                 soul.activar_seguimeinto_camara_x()
             if event.key == pygame.K_c:
                 soul.activar_seguimeinto_camara_y()
+            if event.key == pygame.K_v:  
+                soul.activar_dash()
+            if event.key == pygame.K_e:  
+                soul.ejecutar_dash()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 soul.detenerse()
@@ -265,7 +349,7 @@ while running:
             item.dibujar(screen)
 
     elif estado_actual_pantalla == PANTALLA_JUEGO:
-        screen.fill("white")
+        screen.fill(("white"))
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             soul.moverIzquierda()
@@ -273,7 +357,7 @@ while running:
             soul.moverDerecha()
 
         camera_x = (soul.rect.centerx - WIDTH // 2) if soul.seguimiento_camara_x else 0
-        camera_y = (soul.rect.centery - HEIGHT // (6/5)) if soul.seguimiento_camara_y else 0
+        camera_y = (soul.rect.centery - HEIGHT // (3/2)) if soul.seguimiento_camara_y else 0
         
         todos_sprites.update()
         espacio_linea = 0
@@ -291,9 +375,9 @@ while running:
                 screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
             
             ###############################################################
-            pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
-            screen.blit(pos_texto, (400, 10 + espacio_linea)) 
-            espacio_linea += 20
+            # pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
+            # screen.blit(pos_texto, (400, 10 + espacio_linea)) 
+            # espacio_linea += 20
         #Variables en tiempo real
         if soul.doble_salto_habilitado:
             estado = "Doble Salto: Activado"
@@ -301,6 +385,12 @@ while running:
         else:
             estado = "Doble Salto: Desactivado"
             color = (255, 0, 0)
+        if soul.dash_habilitado:
+            estado_dash = "Dash: Activado"
+            color_dash = (0, 255, 0)
+        else:
+            estado_dash = "Dash: Desactivado"
+            color_dash = (255, 0, 0)
         if soul.seguimiento_camara_x:
             estado_camara_x = "Seguimiento Camara X: Activado"
             color_camara_x = (0, 255, 0)
@@ -322,16 +412,20 @@ while running:
 
         texto_estado = fuente_pequeña.render(estado, True, color)
         screen.blit(texto_estado, (10, 50))
-        texto_estado = fuente_pequeña.render(estado_camara_x, True, color_camara_x)
+        texto_estado = fuente_pequeña.render(estado_dash, True, color_dash)
         screen.blit(texto_estado, (10, 70))
-        texto_estado = fuente_pequeña.render(estado_camara_y, True, color_camara_y)
+
+
+        texto_estado = fuente_pequeña.render(estado_camara_x, True, color_camara_x)
         screen.blit(texto_estado, (10, 90))
+        texto_estado = fuente_pequeña.render(estado_camara_y, True, color_camara_y)
+        screen.blit(texto_estado, (10, 110))
 
 
         pos_texto = fuente_pequeña.render(f"Camara X: {camera_x}", True, (100, 100, 100))
-        screen.blit(pos_texto, (10, 110)) 
-        pos_texto = fuente_pequeña.render(f"Camara Y: {camera_y}", True, (100, 100, 100))
         screen.blit(pos_texto, (10, 130)) 
+        pos_texto = fuente_pequeña.render(f"Camara Y: {camera_y}", True, (100, 100, 100))
+        screen.blit(pos_texto, (10, 150)) 
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
