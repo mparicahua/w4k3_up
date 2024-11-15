@@ -13,7 +13,7 @@ class Jugador(pygame.sprite.Sprite):
         self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
         #self.imagen.fill((0, 255, 100))
         
-        self.flip= False
+
         self.saltando = False
         self.rect = self.imagen.get_rect()
         self.rect.x = 50
@@ -145,12 +145,12 @@ class Jugador(pygame.sprite.Sprite):
         if self.dash_duracion <= 0:
             self.velocidad_x = -5
             self.mirando_derecha = False
-            self.flip =True
+
     def moverDerecha(self):
         if self.dash_duracion <= 0: 
             self.velocidad_x = 5
             self.mirando_derecha = True
-            self.flip = False
+
     def detenerse(self):
         if self.dash_duracion <= 0:
             self.velocidad_x = 0
@@ -366,16 +366,16 @@ while running:
             sprite.rect.x = sprite.rect.x - camera_x
             sprite.rect.y = sprite.rect.y - camera_y
 
-            if hasattr(sprite, 'flip'):
-                imagen_flip = pygame.transform.flip(sprite.imagen,sprite.flip,False)
+            if hasattr(sprite, 'mirando_derecha'):
+                imagen_flip = pygame.transform.flip(sprite.imagen,not sprite.mirando_derecha,False)
                 screen.blit(imagen_flip, (sprite.rect.x , sprite.rect.y ))
             else:
                 screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
             
             ###############################################################
-            pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
-            screen.blit(pos_texto, (400, 10 + espacio_linea)) 
-            espacio_linea += 20
+            # pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
+            # screen.blit(pos_texto, (400, 10 + espacio_linea)) 
+            # espacio_linea += 20
         #Variables en tiempo real
         if soul.doble_salto_habilitado:
             estado = "Doble Salto: Activado"
