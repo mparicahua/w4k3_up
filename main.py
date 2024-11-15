@@ -83,21 +83,21 @@ class Jugador(pygame.sprite.Sprite):
                 self.animaciones[nombre_animacion]["frameIndex"]  = 1 
         
         #################################################
-        # Actualizar dash
+
         if self.dash_duracion > 0:
             self.dash_duracion -= 1
             if self.dash_duracion <= 0:
                 self.velocidad_x = 0
         
-        # Actualizar cooldown del dash
+
         if self.dash_cooldown > 0:
             self.dash_cooldown -= 1
             if self.dash_cooldown <= 0:
                 self.puede_dash = True
 
 
-        self.velocidad_y += 0.5  # Gravedad
-        if self.velocidad_y > 10:  # Velocidad terminal
+        self.velocidad_y += 0.5 
+        if self.velocidad_y > 10: 
             self.velocidad_y = 10
         # Mover horizontalmente
         self.rect.x += self.velocidad_x
@@ -126,20 +126,18 @@ class Jugador(pygame.sprite.Sprite):
         if self.saltando == False:
             self.velocidad_y = -10
             self.saltando = True
-        elif self.doble_salto_habilitado and self.doble_salto_disponible:  # Doble salto
+        elif self.doble_salto_habilitado and self.doble_salto_disponible:
             self.velocidad_y = -10
             self.doble_salto_disponible = False
     def ejecutar_dash(self):
         if self.dash_habilitado and self.puede_dash:
-            self.dash_duracion = 10  # Duración del dash en frames
+            self.dash_duracion = 10
             self.puede_dash = False
-            self.dash_cooldown = 30  # Cooldown del dash en frames
-            # Velocidad del dash según la dirección
+            self.dash_cooldown = 30
             if self.mirando_derecha:
                 self.velocidad_x = self.dash_velocidad
             else:
                 self.velocidad_x = -self.dash_velocidad
-            # Reducir la velocidad vertical durante el dash
             self.velocidad_y *= 0.3
     def moverIzquierda(self):
         if self.dash_duracion <= 0:
