@@ -1,5 +1,7 @@
 import pygame
 import sys
+import csv
+from mundo import Mundo
 pygame.init()
 class Jugador(pygame.sprite.Sprite):
     def __init__(self):
@@ -16,7 +18,7 @@ class Jugador(pygame.sprite.Sprite):
 
         self.saltando = False
         self.rect = self.imagen.get_rect()
-        self.rect.x = 50
+        self.rect.x = 100
         self.rect.y = HEIGHT - 70
         self.velocidad_x = 0
         self.velocidad_y = 0
@@ -122,6 +124,9 @@ class Jugador(pygame.sprite.Sprite):
             elif self.velocidad_y < 0:
                 self.rect.top = plataforma.rect.bottom
             self.velocidad_y = 0
+
+        
+        
     def saltar(self):
         if self.saltando == False:
             self.velocidad_y = -10
@@ -152,29 +157,11 @@ class Jugador(pygame.sprite.Sprite):
     def detenerse(self):
         if self.dash_duracion <= 0:
             self.velocidad_x = 0
-class Rectangulo(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.imagen = pygame.Surface((30, 50))
-        self.imagen.fill("blue")
-        self.posicion=[0,0]
-    def moverDerecha(self):
-        self.posicion[0] += 5
-        print(self.posicion)
-    def moverIzquierda(self):
-        self.posicion[0] -= 5
-        print(self.posicion)
-    def moverArriba(self):
-        self.posicion[1] -= 5
-        print(self.posicion)
-    def moverAbajo(self):
-        self.posicion[1] += 5
-        print(self.posicion)
 class Plataforma(pygame.sprite.Sprite):
-    def __init__(self,x,y,ancho,alto):
+    def __init__(self,x,y,imagen):
         super().__init__()
-        self.imagen = pygame.Surface((ancho, alto))
-        self.imagen.fill((0, 0, 0))
+        self.imagen = imagen
+        #self.imagen.fill((0, 0, 0))
         self.rect = self.imagen.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -228,13 +215,13 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 soul = Jugador()
 
-lista_plataformas = [
-    [0, screen.get_height() - 20, screen.get_width()*10, 4000],#Piso del nivel
-    [-500,-500,500,screen.get_height() + 1000],#pared izquierda
-    [100, screen.get_height() - 40, 100, 40],
-    [200, screen.get_height() - 120, 100, 10],
-    [screen.get_width()*10, screen.get_height()+2000, screen.get_width()*10, 2000],#Piso del nivel 2
-]
+# lista_plataformas = [
+#     [0, screen.get_height() - 20, screen.get_width()*10, 4000],#Piso del nivel
+#     [-500,-500,500,screen.get_height() + 1000],#pared izquierda
+#     [100, screen.get_height() - 40, 100, 40],
+#     [200, screen.get_height() - 120, 100, 10],
+#     [screen.get_width()*10, screen.get_height()+2000, screen.get_width()*10, 2000],#Piso del nivel 2
+# ]
 def comenzar_juego():
     global estado_actual_pantalla
     estado_actual_pantalla = PANTALLA_JUEGO
@@ -262,35 +249,35 @@ todos_sprites = pygame.sprite.Group()
 plataformas = pygame.sprite.Group()
 todos_sprites.add(soul)
 
-for plataforma in  lista_plataformas:
-    p = Plataforma(plataforma[0], plataforma[1], plataforma[2], plataforma[3])
-    todos_sprites.add(p)
-    plataformas.add(p)
-Plataforma.crear_plataforma(140,500, 140,20) #1
-Plataforma.crear_plataforma(490,500, 70, 100 ) #2
-Plataforma.crear_plataforma(560,420,140,200) #3
-Plataforma.crear_plataforma(630,280,70,20) #4
-Plataforma.crear_plataforma(420,180,280,20) #5
-Plataforma.crear_plataforma(0,180, 280, 20) #6
-Plataforma.crear_plataforma(140,80,140,20)#7
-Plataforma.crear_plataforma(350,0, 140, 20) # plataforma del medio y = 0 #8
-Plataforma.crear_plataforma(560, -80, 140, 20) #9
-Plataforma.crear_plataforma(350,-160, 140, 20) #10
-Plataforma.crear_plataforma(140, -240, 70, 20) #11
-Plataforma.crear_plataforma(630,-240, 70,20) #12
-Plataforma.crear_plataforma(910, -80,70,20) #13
-Plataforma.crear_plataforma(1120, -160,70,20) #14
-Plataforma.crear_plataforma(1330, -240,70,20) #15
-Plataforma.crear_plataforma(1540, -160,70,20) #16
-Plataforma.crear_plataforma(1750, -240,70,20) #17
-Plataforma.crear_plataforma(1260,500,70,120) #18
-Plataforma.crear_plataforma(1330,280,70,20) #19
-Plataforma.crear_plataforma(1540,200,70,20) #20
-Plataforma.crear_plataforma(1750, 120,70,20) #21
-Plataforma.crear_plataforma(1820,420,140,20) #22
-#plataformas verticales ancho < alto
-Plataforma.crear_plataforma(350,180,70,300) #23
-Plataforma.crear_plataforma(770,-240, 70,720) #24
+# for plataforma in  lista_plataformas:
+#     p = Plataforma(plataforma[0], plataforma[1], plataforma[2], plataforma[3])
+#     todos_sprites.add(p)
+#     plataformas.add(p)
+# Plataforma.crear_plataforma(140,500, 140,20) #1
+# Plataforma.crear_plataforma(490,500, 70, 100 ) #2
+# Plataforma.crear_plataforma(560,420,140,200) #3
+# Plataforma.crear_plataforma(630,280,70,20) #4
+# Plataforma.crear_plataforma(420,180,280,20) #5
+# Plataforma.crear_plataforma(0,180, 280, 20) #6
+# Plataforma.crear_plataforma(140,80,140,20)#7
+# Plataforma.crear_plataforma(350,0, 140, 20) # plataforma del medio y = 0 #8
+# Plataforma.crear_plataforma(560, -80, 140, 20) #9
+# Plataforma.crear_plataforma(350,-160, 140, 20) #10
+# Plataforma.crear_plataforma(140, -240, 70, 20) #11
+# Plataforma.crear_plataforma(630,-240, 70,20) #12
+# Plataforma.crear_plataforma(910, -80,70,20) #13
+# Plataforma.crear_plataforma(1120, -160,70,20) #14
+# Plataforma.crear_plataforma(1330, -240,70,20) #15
+# Plataforma.crear_plataforma(1540, -160,70,20) #16
+# Plataforma.crear_plataforma(1750, -240,70,20) #17
+# Plataforma.crear_plataforma(1260,500,70,120) #18
+# Plataforma.crear_plataforma(1330,280,70,20) #19
+# Plataforma.crear_plataforma(1540,200,70,20) #20
+# Plataforma.crear_plataforma(1750, 120,70,20) #21
+# Plataforma.crear_plataforma(1820,420,140,20) #22
+# #plataformas verticales ancho < alto
+# Plataforma.crear_plataforma(350,180,70,300) #23
+# Plataforma.crear_plataforma(770,-240, 70,720) #24
 
 pygame.mixer.music.load("assets/musica/Other World.mp3")
 pygame.mixer.music.play(100)
@@ -303,6 +290,37 @@ fuente_pequeña = pygame.font.Font(None, 24)
 
 camera_x = 0
 camera_y = 0
+
+
+
+world_data = []
+for fila in range(500):
+    filas = [-1] * 500
+    world_data.append(filas)
+
+with open("assets/mapa/plataforma01.csv",newline='')as csvfile:
+    reader = csv.reader(csvfile,delimiter=',')
+    for x,fila in enumerate(reader):
+        for y,columna in enumerate(fila):
+            world_data[x][y] = int(columna)
+
+
+
+tile_list = []
+for x in range(49):
+    tile_image = pygame.image.load(f"assets/imagenes/plataformas/tile{x}.png")
+    tile_image = pygame.transform.scale(tile_image,(60,60))
+    tile_list.append(tile_image)
+
+mundo = Mundo()
+mundo.process_data(world_data,tile_list)
+
+for tile in  mundo.map_tiles:
+    p = Plataforma(tile[2] ,tile[3],tile[0])
+    todos_sprites.add(p)
+    plataformas.add(p)
+
+
 
 
 clock = pygame.time.Clock()
@@ -340,12 +358,15 @@ while running:
         screen.blit(mensaje_presentacion, mensaje_presentacion_posicion)
 
     elif estado_actual_pantalla == PANTALLA_MENU:
-        screen.fill((0, 0, 0))
+        screen.fill((52, 73, 94))
+        fondo_menu = pygame.image.load("assets/imagenes/portada/Facing_Straight.png")
+        screen.blit(fondo_menu,(0,0))
+        
         for item in menu_items:
             item.dibujar(screen)
 
     elif estado_actual_pantalla == PANTALLA_JUEGO:
-        screen.fill(("white"))
+        screen.fill((27, 58, 60))
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             soul.moverIzquierda()
@@ -357,7 +378,6 @@ while running:
         
         todos_sprites.update()
         espacio_linea = 0
-        
         
         for sprite in todos_sprites:
             #coregir bug visual de volver quitar seguimiento x o y
@@ -374,6 +394,7 @@ while running:
             # pos_texto = fuente_pequeña.render(f"Tipo:{type(sprite)} X: {sprite.rect.x}, Y: {sprite.rect.y}", True, (100, 100, 100))
             # screen.blit(pos_texto, (400, 10 + espacio_linea)) 
             # espacio_linea += 20
+        #mundo.draw(screen)
         #Variables en tiempo real
         if soul.doble_salto_habilitado:
             estado = "Doble Salto: Activado"
