@@ -1,6 +1,7 @@
 class Mundo:
     def __init__(self):
-        self.map_tiles= []
+        self.mapa_tiles= []
+        self.bg_imagenes = []
     def process_data(self, data, tile_list):
         for y, row in enumerate(data):
             for x, tile in enumerate (row):
@@ -12,4 +13,11 @@ class Mundo:
                     image_rect.x = image_x
                     image_rect.y = image_y
                     tile_data = [image, image_rect, image_x,image_y]
-                    self.map_tiles.append(tile_data)
+                    self.mapa_tiles.append(tile_data)
+    def dibujar_bg(self,screen,scroll):
+        bg_width = self.bg_imagenes[0].get_width()
+        for x in range(5):
+            speed = 1
+            for i in self.bg_imagenes:
+                screen.blit(i, ((x * bg_width) - scroll * speed, 0))
+                speed += 0.2
