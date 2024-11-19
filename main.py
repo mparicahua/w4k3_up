@@ -10,7 +10,7 @@ class Jugador(pygame.sprite.Sprite):
                             "parado": {"frames":[],"frameIndex":1,"numeroFrames":17,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","repetir":True},
                             "saltando": {"frames":[],"frameIndex":1,"numeroFrames":5,"cooldownAnimacion":200,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","repetir":True},
                             "dasheando": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D","repetir":True},
-                            "muriendo": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D","repetir":False}
+                            # "muriendo": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D","repetir":False}
                             }
         self.cargar_animacion()
         self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
@@ -320,7 +320,7 @@ for fila in range(512):
     filas = [-1] * 512
     world_data.append(filas)
 
-with open("assets/mapa/plataforma02.csv",newline='')as csvfile:
+with open("assets/mapa/plataforma01.csv",newline='')as csvfile:
     reader = csv.reader(csvfile,delimiter=',')
     for x,fila in enumerate(reader):
         for y,columna in enumerate(fila):
