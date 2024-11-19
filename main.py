@@ -29,7 +29,7 @@ class Jugador(pygame.sprite.Sprite):
         self.doble_salto_habilitado = False 
         self.seguimiento_camara_y = True 
         self.seguimiento_camara_x = True 
-
+        self.esta_muetro= False
         #Pruebas dash
         self.dash_habilitado = False
         self.puede_dash = True
