@@ -6,10 +6,11 @@ pygame.init()
 class Jugador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.animaciones = {"corriendo": {"frames":[],"frameIndex":1,"numeroFrames":6,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":""},
-                            "parado": {"frames":[],"frameIndex":1,"numeroFrames":17,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":""},
-                            "saltando": {"frames":[],"frameIndex":1,"numeroFrames":5,"cooldownAnimacion":200,"actualizado_fecha":pygame.time.get_ticks(),"tipo":""},
-                            "dasheando": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D"}
+        self.animaciones = {"corriendo": {"frames":[],"frameIndex":1,"numeroFrames":6,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","repetir":True},
+                            "parado": {"frames":[],"frameIndex":1,"numeroFrames":17,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","repetir":True},
+                            "saltando": {"frames":[],"frameIndex":1,"numeroFrames":5,"cooldownAnimacion":200,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","repetir":True},
+                            "dasheando": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D","repetir":True},
+                            "muriendo": {"frames":[],"frameIndex":1,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D","repetir":False}
                             }
         self.cargar_animacion()
         self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
@@ -37,12 +38,6 @@ class Jugador(pygame.sprite.Sprite):
         self.dash_velocidad = 15
         ##########################
 
-        pygame.draw.rect(
-            self.imagen,
-            (0, 255, 0),
-            self.rect,
-            50
-        )
     def cargar_animacion(self):
         for nombre_animacion in self.animaciones.keys():
             for i in range(self.animaciones[nombre_animacion]["numeroFrames"]):
@@ -111,6 +106,7 @@ class Jugador(pygame.sprite.Sprite):
                 self.rect.right = plataforma.rect.left
             elif self.velocidad_x < 0:
                 self.rect.left = plataforma.rect.right
+            self.velocidad_x = 0
 
         # Mover verticalmente
         self.rect.y += self.velocidad_y
@@ -188,8 +184,8 @@ class MenuItem:
         elif event.type == pygame.MOUSEBUTTONDOWN and self.seleccionado:
             self.callback()
 #variables
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 960
+HEIGHT = 480
 PANTALLA_PRESENTACION = 0
 PANTALLA_MENU = 1
 PANTALLA_JUEGO = 2
@@ -200,6 +196,9 @@ DARK_RED = (139, 0, 0)
 GOLD = (218, 165, 32)
 WHITE = (255, 255, 255)
 GRAY = (169, 169, 169)
+
+
+
 
 #Fuentes
 try:
@@ -212,6 +211,29 @@ except:
     gothic_small = pygame.font.Font(None, 24)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
+########################################################
+#define game variables
+scroll = 0
+bg_images = []
+for i in range(1, 5):
+  bg_image = pygame.image.load(f"assets/imagenes/background/background{i}.png").convert_alpha()
+  bg_images.append(bg_image)
+bg_width = bg_images[0].get_width()
+
+def draw_bg():
+  for x in range(5):
+    speed = 1
+    for i in bg_images:
+      screen.blit(i, ((x * bg_width) - scroll * speed, 0))
+      speed += 0.2
+
+########################################################
+
+
+
+
 
 soul = Jugador()
 
@@ -294,11 +316,11 @@ camera_y = 0
 
 
 world_data = []
-for fila in range(500):
-    filas = [-1] * 500
+for fila in range(512):
+    filas = [-1] * 512
     world_data.append(filas)
 
-with open("assets/mapa/plataforma01.csv",newline='')as csvfile:
+with open("assets/mapa/plataforma02.csv",newline='')as csvfile:
     reader = csv.reader(csvfile,delimiter=',')
     for x,fila in enumerate(reader):
         for y,columna in enumerate(fila):
@@ -366,12 +388,14 @@ while running:
             item.dibujar(screen)
 
     elif estado_actual_pantalla == PANTALLA_JUEGO:
-        screen.fill((27, 58, 60))
+        
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             soul.moverIzquierda()
+
         if keys[pygame.K_RIGHT]:
             soul.moverDerecha()
+       
 
         camera_x = (soul.rect.centerx - WIDTH // 2) if soul.seguimiento_camara_x else 0
         camera_y = (soul.rect.centery - HEIGHT // (3/2)) if soul.seguimiento_camara_y else 0
@@ -379,6 +403,11 @@ while running:
         todos_sprites.update()
         espacio_linea = 0
         
+        if keys[pygame.K_LEFT] and scroll > 0:
+            scroll += (soul.velocidad_x)/4
+        if keys[pygame.K_RIGHT] and scroll < 3000:
+            scroll += (soul.velocidad_x)/4
+        draw_bg()
         for sprite in todos_sprites:
             #coregir bug visual de volver quitar seguimiento x o y
             sprite.rect.x = sprite.rect.x - camera_x
@@ -443,6 +472,8 @@ while running:
         screen.blit(pos_texto, (10, 130)) 
         pos_texto = fuente_pequeña.render(f"Camara Y: {camera_y}", True, (100, 100, 100))
         screen.blit(pos_texto, (10, 150)) 
+        pos_texto = fuente_pequeña.render(f"Scroll Paralax: {scroll}", True, (100, 100, 100))
+        screen.blit(pos_texto, (10, 170)) 
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
