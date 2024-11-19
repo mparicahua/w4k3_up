@@ -14,12 +14,12 @@ Si tiene algún comentario, comuníquese con nosotros en mparicahua@isur.edu.pe
 Para implementar este proyecto, ejecute
 
 ```bash
+  pip install pygame
+```
+```bash
   python .\main.py
 ```
-o
-```bash
-  python3 .\main.py
-```
+
 
 ## Autores
 
