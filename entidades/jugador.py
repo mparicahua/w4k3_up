@@ -98,12 +98,15 @@ class Jugador(pygame.sprite.Sprite):
         for nombre_animacion in self.animaciones.keys():
             if self.animaciones[nombre_animacion]["seleccionado"]:
                 if pygame.time.get_ticks() - self.animaciones[nombre_animacion]["actualizado_fecha"] >= self.animaciones[nombre_animacion]["cooldownAnimacion"]:
-                    if self.animaciones[nombre_animacion]["frameIndex"] + 1 != len(self.animaciones[nombre_animacion]["frames"]) and not self.animaciones[nombre_animacion]["bucle"] :
+                    if self.animaciones[nombre_animacion]["bucle"] :
+                        self.animaciones[nombre_animacion]["frameIndex"] += 1
+                    elif self.animaciones[nombre_animacion]["frameIndex"] + 2 != len(self.animaciones[nombre_animacion]["frames"]):
                         self.animaciones[nombre_animacion]["frameIndex"] += 1
                     self.animaciones[nombre_animacion]["actualizado_fecha"] = pygame.time.get_ticks()
                 if self.animaciones[nombre_animacion]["frameIndex"] >= len(self.animaciones[nombre_animacion]["frames"]):
                         self.animaciones[nombre_animacion]["frameIndex"]  = 0 
             else:
+                
                 self.animaciones[nombre_animacion]["frameIndex"] = 0  
         
         ###################################################################################################################################################
