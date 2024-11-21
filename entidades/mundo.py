@@ -1,3 +1,4 @@
+from constantes import TAMANIO_PLATAFORMA
 class Mundo:
     def __init__(self):
         self.mapa_tiles= []
@@ -7,15 +8,18 @@ class Mundo:
             for x, tile in enumerate (row):
                 if tile >= 0:
                     tipo = "R"
+                    es_alama = False
                     if tile == 8:
                         tipo = "M"
+                    if tile == 24:
+                        es_alama = True
                     image = tile_list[tile]
                     image_rect = image.get_rect()
-                    image_x = x * 60
-                    image_y = y * 60
+                    image_x = x * TAMANIO_PLATAFORMA
+                    image_y = y * TAMANIO_PLATAFORMA
                     image_rect.x = image_x
                     image_rect.y = image_y
-                    tile_data = [image, image_rect, image_x,image_y,tipo]
+                    tile_data = [image, image_rect, image_x,image_y,tipo,es_alama]
                     self.mapa_tiles.append(tile_data)
     def dibujar_bg(self,screen,scroll):
         bg_width = self.bg_imagenes[0].get_width()

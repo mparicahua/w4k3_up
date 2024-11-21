@@ -1,8 +1,8 @@
 import pygame
 import sys
 import csv
-from constantes import WIDTH, HEIGHT,PANTALLA_PRESENTACION ,PANTALLA_MENU ,PANTALLA_JUEGO ,FPS,GOTHIC_BIG,GOTHIC_MENU,GOTHIC_SMALL,DARK_RED,GRAY,FUENTE_GRANDE,FUENTE_NORMAL,FUENTE_PEQUENIA,TAMANIO_COLUMNA ,TAMANIO_FILA ,TAMANIO_IMAGENES_PLATAFORMA,UBICACION_MAPA 
-
+from constantes import WIDTH, HEIGHT,PANTALLA_PRESENTACION ,PANTALLA_MENU ,PANTALLA_JUEGO ,FPS,GOTHIC_BIG,GOTHIC_MENU,GOTHIC_SMALL,DARK_RED,GRAY,FUENTE_GRANDE,FUENTE_NORMAL,FUENTE_PEQUENIA,TAMANIO_COLUMNA ,TAMANIO_FILA ,TAMANIO_IMAGENES_PLATAFORMA,UBICACION_MAPA,TAMANIO_PLATAFORMA 
+from entidades.alma import Alma
 from entidades.jugador import Jugador
 from entidades.plataforma import Plataforma
 from entidades.camara import Camara
@@ -51,6 +51,12 @@ class Game:
             elif self.jugador.velocidad_y < 0:
                 self.jugador.rect.top = plataforma.rect.bottom
             self.jugador.velocidad_y = 0
+    def check_colicion_almas(self):
+        lista_coliciones_almas_horizontales = pygame.sprite.spritecollide(self.jugador, self.almas, False)
+        for alma in lista_coliciones_almas_horizontales:
+            self.jugador.cantidad_almas += alma.cantidad_almas
+            self.almas.remove(alma)
+            self.todos_sprites.remove(alma)
     def comenzar_juego(self):
         self.estado_actual_pantalla = PANTALLA_JUEGO
     def terminar_juego(self):
@@ -59,7 +65,6 @@ class Game:
     def inicializar_juego(self):
         self.inicializar_jugador()
         self.inicializar_platformas()
-        
         self.inicializar_musica()
         self.inicializar_items_menu()
         self.inicializar_bg()
@@ -86,16 +91,21 @@ class Game:
         tile_list = []
         for x in range(TAMANIO_IMAGENES_PLATAFORMA):
             tile_image = pygame.image.load(f"assets/imagenes/plataformas/tile{x}.png")
-            tile_image = pygame.transform.scale(tile_image,(60,60))
+            tile_image = pygame.transform.scale(tile_image,(TAMANIO_PLATAFORMA,TAMANIO_PLATAFORMA))
             tile_list.append(tile_image)
 
 
         self.mundo_diseño.process_data(data_plataformas,tile_list)
 
         for tile in  self.mundo_diseño.mapa_tiles:
-            p = Plataforma(tile[2] ,tile[3],tile[0],tile[4])
-            self.todos_sprites.add(p)
-            self.plataformas.add(p)
+            if tile[5]:
+                a = Alma(tile[2],tile[3])
+                self.todos_sprites.add(a)
+                self.almas.add(a)
+            else:
+                p = Plataforma(tile[2] ,tile[3],tile[0],tile[4])
+                self.todos_sprites.add(p)
+                self.plataformas.add(p)
     def inicializar_bg(self):
         for i in range(1, 5):
             bg_image = pygame.image.load(f"assets/imagenes/background/background{i}.png").convert_alpha()
@@ -230,6 +240,8 @@ class Game:
             self.screen.blit(pos_texto, (10, 150)) 
             pos_texto = FUENTE_PEQUENIA.render(f"Estoy vivo: {self.jugador.estoy_vivo}", True, (100, 100, 100))
             self.screen.blit(pos_texto, (10, 170)) 
+            pos_texto = FUENTE_PEQUENIA.render(f"Almas : {self.jugador.cantidad_almas}", True, (100, 100, 100))
+            self.screen.blit(pos_texto, (10, 190)) 
             
         pygame.display.flip()  
     def run(self):
@@ -238,6 +250,7 @@ class Game:
             self.update()
             self.check_colicion_horizontal()
             self.check_colicion_vertical()
+            self.check_colicion_almas()
             self.render()
             #self.mundo_diseño.dibujar_bg(self.screen,self.scroll)
             self.clock.tick(FPS)

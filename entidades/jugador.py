@@ -19,7 +19,7 @@ class Jugador(pygame.sprite.Sprite):
         self.velocidad_x = 0
         self.velocidad_y = 0
         self.mirando_derecha = True
-
+        self.cantidad_almas = 0
         self.doble_salto_disponible = True
         self.doble_salto_habilitado = False 
         self.seguimiento_camara_y = True 
@@ -100,7 +100,7 @@ class Jugador(pygame.sprite.Sprite):
                 if pygame.time.get_ticks() - self.animaciones[nombre_animacion]["actualizado_fecha"] >= self.animaciones[nombre_animacion]["cooldownAnimacion"]:
                     if self.animaciones[nombre_animacion]["bucle"] :
                         self.animaciones[nombre_animacion]["frameIndex"] += 1
-                    elif self.animaciones[nombre_animacion]["frameIndex"] + 2 != len(self.animaciones[nombre_animacion]["frames"]):
+                    elif self.animaciones[nombre_animacion]["frameIndex"] + 1 != len(self.animaciones[nombre_animacion]["frames"]):
                         self.animaciones[nombre_animacion]["frameIndex"] += 1
                     self.animaciones[nombre_animacion]["actualizado_fecha"] = pygame.time.get_ticks()
                 if self.animaciones[nombre_animacion]["frameIndex"] >= len(self.animaciones[nombre_animacion]["frames"]):
