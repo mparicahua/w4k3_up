@@ -6,13 +6,16 @@ class Mundo:
         for y, row in enumerate(data):
             for x, tile in enumerate (row):
                 if tile >= 0:
+                    tipo = "R"
+                    if tile == 8:
+                        tipo = "M"
                     image = tile_list[tile]
                     image_rect = image.get_rect()
                     image_x = x * 60
                     image_y = y * 60
                     image_rect.x = image_x
                     image_rect.y = image_y
-                    tile_data = [image, image_rect, image_x,image_y]
+                    tile_data = [image, image_rect, image_x,image_y,tipo]
                     self.mapa_tiles.append(tile_data)
     def dibujar_bg(self,screen,scroll):
         bg_width = self.bg_imagenes[0].get_width()

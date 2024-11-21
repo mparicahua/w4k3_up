@@ -53,7 +53,7 @@ class Jugador(pygame.sprite.Sprite):
     def activar_seguimeinto_camara_x(self):
         self.seguimiento_camara_x = not self.seguimiento_camara_x
     def activar_muerte_jugador(self):
-        self.estoy_vivo = not self.estoy_vivo
+        self.estoy_vivo = False
 
     def update(self):
         #Animaciones
@@ -98,13 +98,13 @@ class Jugador(pygame.sprite.Sprite):
         for nombre_animacion in self.animaciones.keys():
             if self.animaciones[nombre_animacion]["seleccionado"]:
                 if pygame.time.get_ticks() - self.animaciones[nombre_animacion]["actualizado_fecha"] >= self.animaciones[nombre_animacion]["cooldownAnimacion"]:
-                    
-                    self.animaciones[nombre_animacion]["frameIndex"] += 1
+                    if self.animaciones[nombre_animacion]["frameIndex"] + 1 != len(self.animaciones[nombre_animacion]["frames"]) and not self.animaciones[nombre_animacion]["bucle"] :
+                        self.animaciones[nombre_animacion]["frameIndex"] += 1
                     self.animaciones[nombre_animacion]["actualizado_fecha"] = pygame.time.get_ticks()
                 if self.animaciones[nombre_animacion]["frameIndex"] >= len(self.animaciones[nombre_animacion]["frames"]):
-                    
                         self.animaciones[nombre_animacion]["frameIndex"]  = 0 
-                    
+            else:
+                self.animaciones[nombre_animacion]["frameIndex"] = 0  
         
         ###################################################################################################################################################
 
@@ -125,14 +125,15 @@ class Jugador(pygame.sprite.Sprite):
             self.velocidad_y = 10
 
     def saltar(self):
-        if self.saltando == False:
-            self.velocidad_y = -10
-            self.saltando = True
-        elif self.doble_salto_habilitado and self.doble_salto_disponible:
-            self.velocidad_y = -10
-            self.doble_salto_disponible = False
+        if self.estoy_vivo:
+            if self.saltando == False:
+                self.velocidad_y = -10
+                self.saltando = True
+            elif self.doble_salto_habilitado and self.doble_salto_disponible:
+                self.velocidad_y = -10
+                self.doble_salto_disponible = False
     def ejecutar_dash(self):
-        if self.dash_habilitado and self.puede_dash:
+        if self.dash_habilitado and self.puede_dash and self.estoy_vivo:
             self.dash_duracion = 10
             self.puede_dash = False
             self.dash_cooldown = 30
@@ -142,15 +143,20 @@ class Jugador(pygame.sprite.Sprite):
                 self.velocidad_x = -self.dash_velocidad
             self.velocidad_y *= 0.3
     def moverIzquierda(self):
-        if self.dash_duracion <= 0:
+        if self.dash_duracion <= 0 and self.estoy_vivo:
             self.velocidad_x = -5
             self.mirando_derecha = False
 
     def moverDerecha(self):
-        if self.dash_duracion <= 0: 
+        if self.dash_duracion <= 0 and self.estoy_vivo: 
             self.velocidad_x = 5
             self.mirando_derecha = True
 
     def detenerse(self):
-        if self.dash_duracion <= 0:
+        if self.dash_duracion <= 0 :
             self.velocidad_x = 0
+    def respawnear (self,x,y):
+        self.estoy_vivo = True
+        self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
+        self.rect.x = x
+        self.rect.y = y

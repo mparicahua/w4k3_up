@@ -26,10 +26,13 @@ class Game:
         self.scroll = 0
         self.mundo_diseño = Mundo()
         self.inicializar_juego()
+        self.punto_guardado =[100,HEIGHT - 70]
     def check_colicion_horizontal(self):
         self.jugador.rect.x += self.jugador.velocidad_x
         lista_coliciones_plataformas_verticales = pygame.sprite.spritecollide(self.jugador, self.plataformas, False)
         for plataforma in lista_coliciones_plataformas_verticales:
+            if plataforma.tipo == "M":
+                self.jugador.activar_muerte_jugador()
             if self.jugador.velocidad_x > 0:
                 self.jugador.rect.right = plataforma.rect.left
             elif self.jugador.velocidad_x < 0:
@@ -39,6 +42,8 @@ class Game:
         self.jugador.rect.y += self.jugador.velocidad_y
         lista_coliciones_plataformas_horizontales = pygame.sprite.spritecollide(self.jugador, self.plataformas, False)
         for plataforma in lista_coliciones_plataformas_horizontales:
+            if plataforma.tipo == "M":
+                self.jugador.activar_muerte_jugador()
             if self.jugador.velocidad_y > 0:
                 self.jugador.rect.bottom = plataforma.rect.top
                 self.jugador.saltando = False
@@ -88,7 +93,7 @@ class Game:
         self.mundo_diseño.process_data(data_plataformas,tile_list)
 
         for tile in  self.mundo_diseño.mapa_tiles:
-            p = Plataforma(tile[2] ,tile[3],tile[0])
+            p = Plataforma(tile[2] ,tile[3],tile[0],tile[4])
             self.todos_sprites.add(p)
             self.plataformas.add(p)
     def inicializar_bg(self):
@@ -121,6 +126,8 @@ class Game:
                     self.jugador.ejecutar_dash()
                 if event.key == pygame.K_BACKSPACE:  
                     self.jugador.activar_muerte_jugador()
+                if event.key == pygame.K_ESCAPE:  
+                    self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     self.jugador.detenerse()
@@ -148,7 +155,7 @@ class Game:
         elif self.estado_actual_pantalla == PANTALLA_MENU:
             self.screen.fill((52, 73, 94))
             fondo_menu = pygame.image.load("assets/imagenes/portada/Facing_Straight.png")
-            fondo_menu = pygame.transform.scale(fondo_menu,(60,60))
+            fondo_menu = pygame.transform.scale(fondo_menu,(HEIGHT,HEIGHT))
             self.screen.blit(fondo_menu,(0,0))
             for item in self.menu_items:
                 item.dibujar(self.screen)
@@ -165,14 +172,14 @@ class Game:
             self.mundo_diseño.dibujar_bg(self.screen,self.scroll)
             for sprite in self.todos_sprites:
                 #coregir bug visual de volver quitar seguimiento x o y
-                sprite.rect.x = sprite.rect.x - self.camara.x
-                sprite.rect.y = sprite.rect.y - self.camara.y
+                #sprite.rect.x = sprite.rect.x - self.camara.x
+                #sprite.rect.y = sprite.rect.y - self.camara.y
 
                 if hasattr(sprite, 'mirando_derecha'):
                     imagen_flip = pygame.transform.flip(sprite.imagen,not sprite.mirando_derecha,False)
-                    self.screen.blit(imagen_flip, (sprite.rect.x , sprite.rect.y ))
+                    self.screen.blit(imagen_flip, (sprite.rect.x - self.camara.x, sprite.rect.y - self.camara.y))
                 else:
-                    self.screen.blit(sprite.imagen, (sprite.rect.x , sprite.rect.y ))
+                    self.screen.blit(sprite.imagen, (sprite.rect.x  - self.camara.x, sprite.rect.y - self.camara.y))
             #Variables en tiempo real
             if self.jugador.doble_salto_habilitado:
                 estado = "Doble Salto: Activado"
