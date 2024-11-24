@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Wake Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        code {
+            background-color: #eaeaea;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #eaeaea;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manual del juego Wake up</h1>
+    <p>Este manual describe las clases, métodos y atributos del juego desarrollado en Python utilizando Pygame.</p>
+
+    <h2>Clases</h2>
+
+    <h3>1. Clase <code>Game</code></h3>
+    <p>Controla el flujo del juego y la interacción entre las distintas entidades.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>screen</code>: Superficie de la pantalla del juego.</li>
+        <li><code>clock</code>: Controla el tiempo de actualización del juego.</li>
+        <li><code>running</code>: Indica si el juego está en ejecución.</li>
+        <li><code>estado_actual_pantalla</code>: Estado de la pantalla actual (presentación, menú, juego).</li>
+        <li><code>todos_sprites</code>: Grupo que contiene todos los sprites del juego.</li>
+        <li><code>plataformas</code>: Grupo que contiene todas las plataformas del juego.</li>
+        <li><code>almas</code>: Grupo que contiene todas las almas recolectables.</li>
+        <li><code>jugador</code>: Instancia del jugador.</li>
+        <li><code>camara</code>: Instancia de la cámara que sigue al jugador.</li>
+        <li><code>menu_items</code>: Elementos del menú principal.</li>
+        <li><code>pausa_items</code>: Elementos del menú de pausa.</li>
+        <li><code>scroll</code>: Desplazamiento de la cámara.</li>
+        <li><code>mundo_diseño</code>: Instancia del mundo del juego.</li>
+        <li><code>punto_guardado</code>: Coordenadas del punto de respawn del jugador.</li>
+        <li><code>inspeccionar_variables</code>: Indica si se deben mostrar las variables de debug.</li>
+        <li><code>juego_pausado</code>: Indica si el juego está en pausa.</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__()</code>: Inicializa el juego y sus componentes.</li>
+        <li><code>check_colicion_horizontal()</code>: Verifica colisiones horizontales del jugador.</li>
+        <li><code>check_colicion_vertical()</code>: Verifica colisiones verticales del jugador.</li>
+        <li><code>check_colicion_almas()</code>: Verifica colisiones del jugador con almas.</li>
+        <li><code>activar_inspeccionador()</code>: Activa o desactiva el modo de inspección de variables.</li>
+        <li><code>comenzar_juego()</code>: Cambia el estado a pantalla de juego.</li>
+        <li><code>reiniciar_juego()</code>: Reinicia el juego y respawnea al jugador.</li>
+        <li><code>volver_menu_principal()</code>: Regresa al menú principal.</li>
+        <li><code>terminar_juego()</code>: Cierra el juego y sale del programa.</li>
+        <li><code>inicializar_juego()</code>: Inicializa todos los componentes del juego.</li>
+        <li><code>inicializar_items_menu()</code>: Crea los elementos del menú principal.</li>
+        <li><code>inicializar_pausa_menu()</code>: Crea los elementos del menú de pausa.</li>
+        <li><code>inicializar_platformas()</code>: Inicializa las plataformas del juego a partir de un archivo CSV.</li>
+        <li><code>render_plataformas()</code>: Dibuja las plataformas y almas en la pantalla.</li>
+        <li><code>inicializar_bg()</code>: Carga las imágenes de fondo del juego.</li>
+        <li><code>inicializar_jugador()</code>: Crea la instancia del jugador y la añade al grupo de sprites.</li>
+        <li><code>inicializar_musica()</code>: Carga y reproduce la música de fondo del juego.</li>
+        <li><code>activar_pausa_juego()</code>: Activa o desactiva la pausa del juego.</li>
+        <li><code>handle_events()</code>: Maneja los eventos del teclado y del ratón.</li>
+        <li><code>update()</code>: Actualiza el estado de los sprites y la cámara.</li>
+        <li><code>render()</code>: Dibuja todos los elementos en la pantalla.</li>
+        <li><code>mostrar_datos()</code>: Muestra información del jugador y del juego en pantalla.</li>
+        <li><code>run()</code>: Inicia el bucle principal del juego.</li>
+    </ul>
+
+    <h3>2. Clase <code>Jugador</code></h3>
+    <p>Representa al jugador en el juego y maneja su comportamiento.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>animaciones</code>: Diccionario que contiene las animaciones del jugador.</li>
+        <li><code>imagen</code>: Imagen actual del jugador.</li>
+        <li><code>rect</code>: Rectángulo que define la posición y tamaño del jugador.</li>
+        <li><code>velocidad_x</code>: Velocidad horizontal del jugador.</li>
+        <li><code>velocidad_y</code>: Velocidad vertical del jugador.</li>
+        <li><code>mirando_derecha</code>: Indica si el jugador está mirando hacia la derecha.</li>
+        <li><code>cantidad_almas</code>: Número de almas recolectadas por el jugador.</li>
+        <li><code>doble_salto_disponible</code>: Indica si el jugador puede realizar un doble salto.</li>
+        <li><code>doble_salto_habilitado</code>: Indica si la habilidad de doble salto está activada.</li>
+        <li><code>seguimiento_camara_y</code>: Indica si la cámara sigue al jugador en el eje Y.</li>
+        <li><code>seguimiento_camara_x</code>: Indica si la cámara sigue al jugador en el eje X.</li>
+        <li><code>estoy_vivo</code>: Indica si el jugador está vivo.</li>
+        <li><code>dash_habilitado</code>: Indica si la habilidad de dash está activada.</li>
+        <li><code>dash_disponible</code>: Indica si el dash está disponible para usar.</li>
+        <li><code>dash_cooldown</code>: Tiempo de espera antes de poder usar el dash nuevamente.</li>
+        <li><code>dash_duracion</code>: Duración del efecto de dash.</li>
+        <li><code>dash_velocidad</code>: Velocidad del dash.</li>
+        <li><code>pausado</code>: Indica si el jugador está en pausa.</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__()</code>: Inicializa el jugador y carga sus animaciones.</li>
+        <li><code>cargar_animacion()</code>: Carga las imágenes para las animaciones del jugador.</li>
+        <li><code>activar_doble_salto()</code>: Activa o desactiva la habilidad de doble salto.</li>
+        <li><code>activar_dash()</code>: Activa o desactiva la habilidad de dash.</li>
+        <li><code>activar_seguimeinto_camara_y()</code>: Activa o desactiva el seguimiento de la cámara en el eje Y.</li>
+        <li><code>activar_seguimeinto_camara_x()</code>: Activa o desactiva el seguimiento de la cámara en el eje X.</li>
+        <li><code>activar_muerte_jugador()</code>: Marca al jugador como muerto.</li>
+        <li><code>update()</code>: Actualiza las animaciones y la posición del jugador.</li>
+        <li><code>saltar()</code>: Hace que el jugador salte.</li>
+        <li><code>ejecutar_dash()</code>: Ejecuta la habilidad de dash.</li>
+        <li><code>moverIzquierda()</code>: Mueve al jugador hacia la izquierda.</li>
+        <li><code>moverDerecha()</code>: Mueve al jugador hacia la derecha.</li>
+        <li><code>detenerse()</code>: Detiene el movimiento horizontal del jugador.</li>
+        <li><code>respawnear(x, y)</code>: Restaura al jugador a una posición específica y lo marca como vivo.</li>
+    </ul>
+
+    <h3>3. Clase <code>Alma</code></h3>
+    <p>Representa las almas recolectables en el juego.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>cantidad_almas_juego</code>: Contador de almas recolectadas en el juego.</li>
+        <li><code>imagen</code>: Imagen de la alma.</li>
+        <li><code>rect</code>: Rectángulo que define la posición y tamaño de la alma.</li>
+        <li><code>cantidad_almas</code>: Número de almas que esta alma proporciona al jugador.</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__(x, y)</code>: Inicializa la alma en una posición específica.</li>
+        <li><code>total_almas_juego()</code>: Método de clase que devuelve el total de almas recolectadas.</li>
+    </ul>
+
+    <h3>4. Clase <code>Plataforma</code></h3>
+    <p>Representa las plataformas en las que el jugador puede caminar o caer.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>imagen</code>: Imagen de la plataforma.</li>
+        <li><code>rect</code>: Rectángulo que define la posición y tamaño de la plataforma.</li>
+        <li><code>tipo</code>: Tipo de plataforma (regular, muerte, deslizante).</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__(x, y, imagen, tipo)</code>: Inicializa la plataforma en una posición específica con un tipo y una imagen.</li>
+    </ul>
+
+    <h3>5. Clase <code>Camara</code></h3>
+    <p>Controla la posición de la cámara en el juego para seguir al jugador.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>x</code>: Posición horizontal de la cámara.</li>
+        <li><code>y</code>: Posición vertical de la cámara.</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__()</code>: Inicializa la cámara en la posición (0, 0).</li>
+        <li><code>update(objeto)</code>: Actualiza la posición de la cámara para seguir al objeto (jugador).</li>
+    </ul>
+
+    <h3>6. Clase <code>MenuItem</code></h3>
+    <p>Representa un elemento en el menú del juego.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>texto_normal</code>: Texto normal del elemento del menú.</li>
+        <li><code>texto_seleccionado</code>: Texto del elemento del menú cuando está seleccionado.</li>
+        <li><code>rect</code>: Rectángulo que define la posición del elemento del menú.</li>
+        <li><code>callback</code>: Función que se ejecuta al seleccionar el elemento del menú.</li>
+        <li><code>seleccionado</code>: Indica si el elemento del menú está seleccionado.</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__(texto, posicion, callback)</code>: Inicializa el elemento del menú con texto y posición.</li>
+        <li><code>dibujar(surface)</code>: Dibuja el elemento del menú en la superficie dada.</li>
+        <li><code>manejar_evento(event)</code>: Maneja los eventos de ratón para el elemento del menú, incluyendo selección y movimiento del ratón.</li>
+    </ul>
+
+    <h3>7. Clase <code>Mundo</code></h3>
+    <p>Representa el mundo del juego, incluyendo las plataformas y el fondo.</p>
+    <h4>Atributos:</h4>
+    <ul>
+        <li><code>mapa_tiles</code>: Lista que contiene los datos de las plataformas y almas en el mundo.</li>
+        <li><code>bg_imagenes</code>: Lista de imágenes de fondo para el juego.</li>
+    </ul>
+    <h4>Métodos:</h4>
+    <ul>
+        <li><code>__init__()</code>: Inicializa el mundo con listas vacías para los tiles y las imágenes de fondo.</li>
+        <li><code>process_data(data, tile_list)</code>: Procesa los datos de las plataformas desde un archivo y crea los objetos correspondientes.</li>
+        <li><code>dibujar_bg(screen, scroll)</code>: Dibuja las imágenes de fondo en la pantalla, aplicando el desplazamiento.</li>
+    </ul>
+
+    
+</body>
+</html>
