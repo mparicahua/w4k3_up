@@ -69,6 +69,11 @@ class Game:
         self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
         self.juego_pausado = False
         self.jugador.pausado = False
+    def volver_menu_principal(self):
+        self.estado_actual_pantalla = PANTALLA_MENU
+    def terminar_juego(self):
+        pygame.quit()
+        sys.exit()  
     def terminar_juego(self):
         pygame.quit()
         sys.exit()  
@@ -91,7 +96,8 @@ class Game:
     def inicializar_pausa_menu(self):
         items = [
             ["Reiniciar", (self.screen.get_width()/2, self.screen.get_height()/2 ), self.comenzar_juego],
-            ["Salir", (self.screen.get_width()/2, self.screen.get_height()/2 + 100), self.terminar_juego]
+            ["Volver al menu", (self.screen.get_width()/2, self.screen.get_height()/2 + 100), self.volver_menu_principal],
+            ["Salir", (self.screen.get_width()/2, self.screen.get_height()/2 + 200), self.terminar_juego]
         ]
         for i in items:
             item = MenuItem(i[0], i[1], i[2])
@@ -160,7 +166,7 @@ class Game:
                     self.jugador.activar_seguimeinto_camara_y()
                 if event.key == pygame.K_v:  
                     self.jugador.activar_dash()
-                if event.key == pygame.K_q:  
+                if event.key == pygame.K_e:  
                     self.jugador.ejecutar_dash()
                 if event.key == pygame.K_BACKSPACE:  
                     self.jugador.activar_muerte_jugador()
@@ -184,11 +190,11 @@ class Game:
                     item.manejar_evento(event)    
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.scroll += (self.jugador.velocidad_x)/4
+            self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
             self.jugador.moverIzquierda()
 
         if keys[pygame.K_RIGHT]:
-            self.scroll += (self.jugador.velocidad_x)/4
+            self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
             self.jugador.moverDerecha()
     def update(self):
         if self.estado_actual_pantalla == PANTALLA_JUEGO:
@@ -229,6 +235,9 @@ class Game:
                 else:
                     self.screen.blit(sprite.imagen, (sprite.rect.x  - self.camara.x, sprite.rect.y - self.camara.y))
             if not self.jugador.estoy_vivo or self.juego_pausado:
+                if not self.jugador.estoy_vivo:
+                    pos_texto = FUENTE_GRANDE.render(f"¡HAS MUERTO!", True, (255, 0, 0))
+                    self.screen.blit(pos_texto, (self.screen.get_width()/2 -100, self.screen.get_height()/2 - 100 ))
                 for item in self.pausa_items:
                     item.dibujar(self.screen)
             self.mostrar_datos()
@@ -302,6 +311,8 @@ class Game:
                 self.screen.blit(pos_texto, (10, 190))
                 pos_texto = FUENTE_PEQUENIA.render(f"Almas : {Alma.total_almas_juego()}", True, (100, 100, 100))
                 self.screen.blit(pos_texto, (10, 210))
+                pos_texto = FUENTE_PEQUENIA.render(f"Scroll : {self.scroll}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 230))
     def run(self):
         while self.running:
             self.handle_events()
