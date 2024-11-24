@@ -26,7 +26,7 @@ class Game:
         self.scroll = 0
         self.mundo_diseño = Mundo()
         self.inicializar_juego()
-        self.punto_guardado =[100,HEIGHT - 70]
+        self.punto_guardado =[575,600]
         self.inspeccionar_variables = False
         self.juego_pausado = False
     def check_colicion_horizontal(self):

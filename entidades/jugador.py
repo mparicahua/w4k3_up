@@ -14,8 +14,8 @@ class Jugador(pygame.sprite.Sprite):
         self.animaciones["saltando"]["seleccionado"] = True
         self.saltando = False
         self.rect = self.imagen.get_rect()
-        self.rect.x = 100
-        self.rect.y = HEIGHT - 70
+        self.rect.x = 575
+        self.rect.y = 600
         self.velocidad_x = 0
         self.velocidad_y = 0
         self.mirando_derecha = True
