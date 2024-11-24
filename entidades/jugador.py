@@ -5,7 +5,7 @@ class Jugador(pygame.sprite.Sprite):
         super().__init__()
         self.animaciones = {"corriendo": {"frames":[],"frameIndex":0,"numeroFrames":6,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","bucle":True,"seleccionado":False},
                             "parado": {"frames":[],"frameIndex":0,"numeroFrames":17,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","bucle":True,"seleccionado":False},
-                            "saltando": {"frames":[],"frameIndex":0,"numeroFrames":5,"cooldownAnimacion":200,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","bucle":True,"seleccionado":False},
+                            "saltando": {"frames":[],"frameIndex":0,"numeroFrames":5,"cooldownAnimacion":200,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","bucle":False,"seleccionado":False},
                             "dasheando": {"frames":[],"frameIndex":0,"numeroFrames":15,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"D","bucle":True,"seleccionado":False},
                             "muriendo": {"frames":[],"frameIndex":0,"numeroFrames":19,"cooldownAnimacion":100,"actualizado_fecha":pygame.time.get_ticks(),"tipo":"","bucle":False,"seleccionado":False}
                             }
@@ -25,13 +25,11 @@ class Jugador(pygame.sprite.Sprite):
         self.seguimiento_camara_y = True 
         self.seguimiento_camara_x = True 
         self.estoy_vivo = True
-        #Pruebas dash
         self.dash_habilitado = True
         self.dash_disponible = True
         self.dash_cooldown = 0
         self.dash_duracion = 0
         self.dash_velocidad = 15
-        ##########################
         self.pausado = False
     def cargar_animacion(self):
         for nombre_animacion in self.animaciones.keys():
@@ -58,59 +56,60 @@ class Jugador(pygame.sprite.Sprite):
 
     def update(self):
         #Animaciones
-        if self.estoy_vivo:
-            if self.saltando:
-                self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
-                self.animaciones["saltando"]["seleccionado"] = True
-                self.animaciones["corriendo"]["seleccionado"] = False
-                self.animaciones["parado"]["seleccionado"] = False
-                self.animaciones["dasheando"]["seleccionado"] = False
-                self.animaciones["muriendo"]["seleccionado"] = False
-            else:
-                if  self.velocidad_x != 0:
-                    self.imagen = self.animaciones["corriendo"]["frames"][self.animaciones["corriendo"]["frameIndex"]]
-                    self.animaciones["saltando"]["seleccionado"] = False
-                    self.animaciones["corriendo"]["seleccionado"] = True
+        if not self.pausado:
+            if self.estoy_vivo :
+                if self.saltando:
+                    self.imagen = self.animaciones["saltando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
+                    self.animaciones["saltando"]["seleccionado"] = True
+                    self.animaciones["corriendo"]["seleccionado"] = False
                     self.animaciones["parado"]["seleccionado"] = False
                     self.animaciones["dasheando"]["seleccionado"] = False
                     self.animaciones["muriendo"]["seleccionado"] = False
-                else :
-                    self.imagen = self.animaciones["parado"]["frames"][self.animaciones["parado"]["frameIndex"]]
+                else:
+                    if  self.velocidad_x != 0:
+                        self.imagen = self.animaciones["corriendo"]["frames"][self.animaciones["corriendo"]["frameIndex"]]
+                        self.animaciones["saltando"]["seleccionado"] = False
+                        self.animaciones["corriendo"]["seleccionado"] = True
+                        self.animaciones["parado"]["seleccionado"] = False
+                        self.animaciones["dasheando"]["seleccionado"] = False
+                        self.animaciones["muriendo"]["seleccionado"] = False
+                    else :
+                        self.imagen = self.animaciones["parado"]["frames"][self.animaciones["parado"]["frameIndex"]]
+                        self.animaciones["saltando"]["seleccionado"] = False
+                        self.animaciones["corriendo"]["seleccionado"] = False
+                        self.animaciones["parado"]["seleccionado"] = True
+                        self.animaciones["dasheando"]["seleccionado"] = False
+                        self.animaciones["muriendo"]["seleccionado"] = False
+                if self.dash_disponible == False:
+                    self.imagen = self.animaciones["dasheando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
                     self.animaciones["saltando"]["seleccionado"] = False
                     self.animaciones["corriendo"]["seleccionado"] = False
-                    self.animaciones["parado"]["seleccionado"] = True
-                    self.animaciones["dasheando"]["seleccionado"] = False
+                    self.animaciones["parado"]["seleccionado"] = False
+                    self.animaciones["dasheando"]["seleccionado"] = True
                     self.animaciones["muriendo"]["seleccionado"] = False
-            if self.dash_disponible == False:
-                self.imagen = self.animaciones["dasheando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
+            else:
+                self.imagen = self.animaciones["muriendo"]["frames"][self.animaciones["muriendo"]["frameIndex"]]
                 self.animaciones["saltando"]["seleccionado"] = False
                 self.animaciones["corriendo"]["seleccionado"] = False
                 self.animaciones["parado"]["seleccionado"] = False
-                self.animaciones["dasheando"]["seleccionado"] = True
-                self.animaciones["muriendo"]["seleccionado"] = False
-        else:
-            self.imagen = self.animaciones["muriendo"]["frames"][self.animaciones["muriendo"]["frameIndex"]]
-            self.animaciones["saltando"]["seleccionado"] = False
-            self.animaciones["corriendo"]["seleccionado"] = False
-            self.animaciones["parado"]["seleccionado"] = False
-            self.animaciones["dasheando"]["seleccionado"] = False
-            self.animaciones["muriendo"]["seleccionado"] = True
-            
-        for nombre_animacion in self.animaciones.keys():
-            if self.animaciones[nombre_animacion]["seleccionado"]:
-                if pygame.time.get_ticks() - self.animaciones[nombre_animacion]["actualizado_fecha"] >= self.animaciones[nombre_animacion]["cooldownAnimacion"]:
-                    if self.animaciones[nombre_animacion]["bucle"] :
-                        self.animaciones[nombre_animacion]["frameIndex"] += 1
-                    elif self.animaciones[nombre_animacion]["frameIndex"] + 1 != len(self.animaciones[nombre_animacion]["frames"]):
-                        self.animaciones[nombre_animacion]["frameIndex"] += 1
-                    self.animaciones[nombre_animacion]["actualizado_fecha"] = pygame.time.get_ticks()
-                if self.animaciones[nombre_animacion]["frameIndex"] >= len(self.animaciones[nombre_animacion]["frames"]):
-                        self.animaciones[nombre_animacion]["frameIndex"]  = 0 
-            else:
+                self.animaciones["dasheando"]["seleccionado"] = False
+                self.animaciones["muriendo"]["seleccionado"] = True
                 
-                self.animaciones[nombre_animacion]["frameIndex"] = 0  
-        
-        ###################################################################################################################################################
+            for nombre_animacion in self.animaciones.keys():
+                if self.animaciones[nombre_animacion]["seleccionado"]:
+                    if pygame.time.get_ticks() - self.animaciones[nombre_animacion]["actualizado_fecha"] >= self.animaciones[nombre_animacion]["cooldownAnimacion"]:
+                        if self.animaciones[nombre_animacion]["bucle"] :
+                            self.animaciones[nombre_animacion]["frameIndex"] += 1
+                        elif self.animaciones[nombre_animacion]["frameIndex"] + 1 != len(self.animaciones[nombre_animacion]["frames"]):
+                            self.animaciones[nombre_animacion]["frameIndex"] += 1
+                        self.animaciones[nombre_animacion]["actualizado_fecha"] = pygame.time.get_ticks()
+                    if self.animaciones[nombre_animacion]["frameIndex"] >= len(self.animaciones[nombre_animacion]["frames"]):
+                            self.animaciones[nombre_animacion]["frameIndex"]  = 0 
+                else:
+                    
+                    self.animaciones[nombre_animacion]["frameIndex"] = 0  
+            
+            ###################################################################################################################################################
         if not self.pausado:
             if self.dash_duracion > 0:
                 self.dash_duracion -= 1

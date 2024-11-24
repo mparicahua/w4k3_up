@@ -24,7 +24,7 @@ class Mundo:
     def dibujar_bg(self,screen,scroll):
         bg_width = self.bg_imagenes[0].get_width()
         for x in range(NUMERO_BG_PARALLAX):
-            speed = 1
+            velocidad = 1
             for i in self.bg_imagenes:
-                screen.blit(i, ((x * bg_width) - scroll * speed, 0))
-                speed += 0.2
+                screen.blit(i, ((x * bg_width) - scroll * velocidad, 0))
+                velocidad += 0.2

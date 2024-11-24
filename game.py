@@ -81,9 +81,6 @@ class Game:
     def terminar_juego(self):
         pygame.quit()
         sys.exit()  
-    def terminar_juego(self):
-        pygame.quit()
-        sys.exit()  
     def inicializar_juego(self):
         self.inicializar_jugador()
         self.inicializar_platformas()
@@ -155,10 +152,8 @@ class Game:
         self.juego_pausado = not self.juego_pausado
         if self.juego_pausado:
             self.jugador.pausado = True
-            self.juego_pausado = True
         else:
             self.jugador.pausado = False
-            self.juego_pausado = False
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -197,12 +192,15 @@ class Game:
                 for item in self.pausa_items:
                     item.manejar_evento(event)    
         keys = pygame.key.get_pressed()
+        
         if keys[pygame.K_LEFT]:
-            self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
+            if not self.juego_pausado:
+                self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
             self.jugador.moverIzquierda()
 
         if keys[pygame.K_RIGHT]:
-            self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
+            if not self.juego_pausado:
+                self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
             self.jugador.moverDerecha()
     def update(self):
         if self.estado_actual_pantalla == PANTALLA_JUEGO:
@@ -231,7 +229,7 @@ class Game:
             
 
             
-            self.mundo_diseño.dibujar_bg(self.screen,self.scroll)
+            self.mundo_diseño.dibujar_bg(self.screen,self.scroll )
             for sprite in self.todos_sprites:
                 #coregir bug visual de volver quitar seguimiento x o y
                 #sprite.rect.x = sprite.rect.x - self.camara.x
