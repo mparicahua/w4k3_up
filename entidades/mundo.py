@@ -7,19 +7,19 @@ class Mundo:
         for y, row in enumerate(data):
             for x, tile in enumerate (row):
                 if tile >= 0:
-                    tipo = "R"
-                    es_alama = False
+                    tipo_plataforma = "R"
+                    tipo_objeto = "P"
                     if tile == 8:
-                        tipo = "M"
+                        tipo_plataforma = "M"
                     if tile == 24:
-                        es_alama = True
+                        tipo_objeto = "A"
                     image = tile_list[tile]
                     image_rect = image.get_rect()
                     image_x = x * TAMANIO_PLATAFORMA
                     image_y = y * TAMANIO_PLATAFORMA
                     image_rect.x = image_x
                     image_rect.y = image_y
-                    tile_data = [image, image_rect, image_x,image_y,tipo,es_alama]
+                    tile_data = [image, image_rect, image_x,image_y,tipo_plataforma,tipo_objeto]
                     self.mapa_tiles.append(tile_data)
     def dibujar_bg(self,screen,scroll):
         bg_width = self.bg_imagenes[0].get_width()

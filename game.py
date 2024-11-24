@@ -16,7 +16,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.estado_actual_pantalla = PANTALLA_PRESENTACION
-
         self.todos_sprites = pygame.sprite.Group()
         self.plataformas = pygame.sprite.Group()
         self.almas = pygame.sprite.Group()
@@ -66,9 +65,17 @@ class Game:
         self.inspeccionar_variables = not self.inspeccionar_variables
     def comenzar_juego(self):
         self.estado_actual_pantalla = PANTALLA_JUEGO
+        self.reiniciar_juego()
+    def reiniciar_juego(self):
         self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
         self.juego_pausado = False
         self.jugador.pausado = False
+        self.jugador.cantidad_almas = 0
+        self.todos_sprites = pygame.sprite.Group()
+        self.plataformas = pygame.sprite.Group()
+        self.almas = pygame.sprite.Group()
+        self.inicializar_jugador()
+        self.render_plataformas()
     def volver_menu_principal(self):
         self.estado_actual_pantalla = PANTALLA_MENU
     def terminar_juego(self):
@@ -95,7 +102,7 @@ class Game:
             self.menu_items.append(item)
     def inicializar_pausa_menu(self):
         items = [
-            ["Reiniciar", (self.screen.get_width()/2, self.screen.get_height()/2 ), self.comenzar_juego],
+            ["Reiniciar", (self.screen.get_width()/2, self.screen.get_height()/2 ), self.reiniciar_juego],
             ["Volver al menu", (self.screen.get_width()/2, self.screen.get_height()/2 + 100), self.volver_menu_principal],
             ["Salir", (self.screen.get_width()/2, self.screen.get_height()/2 + 200), self.terminar_juego]
         ]
@@ -121,13 +128,15 @@ class Game:
 
 
         self.mundo_diseño.process_data(data_plataformas,tile_list)
-
+        self.render_plataformas()   
+    def render_plataformas(self):
+        Alma.cantidad_almas_juego = 0
         for tile in  self.mundo_diseño.mapa_tiles:
-            if tile[5]:
+            if tile[5] == "A":
                 a = Alma(tile[2],tile[3])
                 self.todos_sprites.add(a)
                 self.almas.add(a)
-            else:
+            elif tile[5] == "P":
                 p = Plataforma(tile[2] ,tile[3],tile[0],tile[4])
                 self.todos_sprites.add(p)
                 self.plataformas.add(p)
@@ -150,7 +159,6 @@ class Game:
         else:
             self.jugador.pausado = False
             self.juego_pausado = False
-
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -168,7 +176,7 @@ class Game:
                     self.jugador.activar_dash()
                 if event.key == pygame.K_e:  
                     self.jugador.ejecutar_dash()
-                if event.key == pygame.K_BACKSPACE:  
+                if event.key == pygame.K_F2:  
                     self.jugador.activar_muerte_jugador()
                 if event.key == pygame.K_F1:  
                     self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
@@ -240,8 +248,7 @@ class Game:
                     self.screen.blit(pos_texto, (self.screen.get_width()/2 -100, self.screen.get_height()/2 - 100 ))
                 for item in self.pausa_items:
                     item.dibujar(self.screen)
-            self.mostrar_datos()
-            
+            self.mostrar_datos()     
     def mostrar_datos(self):
         #Mostrar almas 
         imagen = pygame.image.load("assets/imagenes/alma/tile0.png")
@@ -321,7 +328,6 @@ class Game:
             self.check_colicion_vertical()
             self.check_colicion_almas()
             self.render()
-
             self.clock.tick(FPS)
             pygame.display.flip()  
         pygame.quit()
