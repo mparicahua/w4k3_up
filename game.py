@@ -23,12 +23,16 @@ class Game:
         self.jugador = None
         self.camara = None
         self.menu_items =[]
+        self.pausa_items =[]
         self.scroll = 0
         self.mundo_diseño = Mundo()
         self.inicializar_juego()
         self.punto_guardado =[100,HEIGHT - 70]
+        self.inspeccionar_variables = False
+        self.juego_pausado = False
     def check_colicion_horizontal(self):
-        self.jugador.rect.x += self.jugador.velocidad_x
+        if not self.juego_pausado:
+            self.jugador.rect.x += self.jugador.velocidad_x
         lista_coliciones_plataformas_verticales = pygame.sprite.spritecollide(self.jugador, self.plataformas, False)
         for plataforma in lista_coliciones_plataformas_verticales:
             if plataforma.tipo == "M":
@@ -39,7 +43,8 @@ class Game:
                 self.jugador.rect.left = plataforma.rect.right
             self.jugador.velocidad_x = 0
     def check_colicion_vertical(self):
-        self.jugador.rect.y += self.jugador.velocidad_y
+        if not self.juego_pausado:
+            self.jugador.rect.y += self.jugador.velocidad_y
         lista_coliciones_plataformas_horizontales = pygame.sprite.spritecollide(self.jugador, self.plataformas, False)
         for plataforma in lista_coliciones_plataformas_horizontales:
             if plataforma.tipo == "M":
@@ -57,8 +62,13 @@ class Game:
             self.jugador.cantidad_almas += alma.cantidad_almas
             self.almas.remove(alma)
             self.todos_sprites.remove(alma)
+    def activar_inspeccionador(self):
+        self.inspeccionar_variables = not self.inspeccionar_variables
     def comenzar_juego(self):
         self.estado_actual_pantalla = PANTALLA_JUEGO
+        self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
+        self.juego_pausado = False
+        self.jugador.pausado = False
     def terminar_juego(self):
         pygame.quit()
         sys.exit()  
@@ -67,6 +77,7 @@ class Game:
         self.inicializar_platformas()
         self.inicializar_musica()
         self.inicializar_items_menu()
+        self.inicializar_pausa_menu()
         self.inicializar_bg()
     def inicializar_items_menu(self):
         items = [
@@ -77,6 +88,14 @@ class Game:
         for i in items:
             item = MenuItem(i[0], i[1], i[2])
             self.menu_items.append(item)
+    def inicializar_pausa_menu(self):
+        items = [
+            ["Reiniciar", (self.screen.get_width()/2, self.screen.get_height()/2 ), self.comenzar_juego],
+            ["Salir", (self.screen.get_width()/2, self.screen.get_height()/2 + 100), self.terminar_juego]
+        ]
+        for i in items:
+            item = MenuItem(i[0], i[1], i[2])
+            self.pausa_items.append(item)
     def inicializar_platformas(self):
         data_plataformas = []
         for fila in range(TAMANIO_COLUMNA):
@@ -117,6 +136,15 @@ class Game:
     def inicializar_musica(self):
         pygame.mixer.music.load("assets/musica/Other World.mp3")
         pygame.mixer.music.play(100)
+    def activar_pausa_juego(self):
+        self.juego_pausado = not self.juego_pausado
+        if self.juego_pausado:
+            self.jugador.pausado = True
+            self.juego_pausado = True
+        else:
+            self.jugador.pausado = False
+            self.juego_pausado = False
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -132,12 +160,16 @@ class Game:
                     self.jugador.activar_seguimeinto_camara_y()
                 if event.key == pygame.K_v:  
                     self.jugador.activar_dash()
-                if event.key == pygame.K_e:  
+                if event.key == pygame.K_q:  
                     self.jugador.ejecutar_dash()
                 if event.key == pygame.K_BACKSPACE:  
                     self.jugador.activar_muerte_jugador()
-                if event.key == pygame.K_ESCAPE:  
+                if event.key == pygame.K_F1:  
                     self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
+                if event.key == pygame.K_F12:  
+                    self.activar_inspeccionador()
+                if event.key == pygame.K_ESCAPE:  
+                    self.activar_pausa_juego()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     self.jugador.detenerse()
@@ -146,7 +178,18 @@ class Game:
                     self.estado_actual_pantalla = PANTALLA_MENU
             elif self.estado_actual_pantalla == PANTALLA_MENU:
                 for item in self.menu_items:
-                    item.manejar_evento(event)        
+                    item.manejar_evento(event)       
+            elif self.estado_actual_pantalla == PANTALLA_JUEGO:
+                for item in self.pausa_items:
+                    item.manejar_evento(event)    
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.scroll += (self.jugador.velocidad_x)/4
+            self.jugador.moverIzquierda()
+
+        if keys[pygame.K_RIGHT]:
+            self.scroll += (self.jugador.velocidad_x)/4
+            self.jugador.moverDerecha()
     def update(self):
         if self.estado_actual_pantalla == PANTALLA_JUEGO:
             self.todos_sprites.update()
@@ -171,14 +214,9 @@ class Game:
                 item.dibujar(self.screen)
         elif self.estado_actual_pantalla == PANTALLA_JUEGO:
             self.screen.fill((255, 255, 255))
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                self.scroll += (self.jugador.velocidad_x)/4
-                self.jugador.moverIzquierda()
+            
 
-            if keys[pygame.K_RIGHT]:
-                self.scroll += (self.jugador.velocidad_x)/4
-                self.jugador.moverDerecha()
+            
             self.mundo_diseño.dibujar_bg(self.screen,self.scroll)
             for sprite in self.todos_sprites:
                 #coregir bug visual de volver quitar seguimiento x o y
@@ -190,60 +228,80 @@ class Game:
                     self.screen.blit(imagen_flip, (sprite.rect.x - self.camara.x, sprite.rect.y - self.camara.y))
                 else:
                     self.screen.blit(sprite.imagen, (sprite.rect.x  - self.camara.x, sprite.rect.y - self.camara.y))
-            #Variables en tiempo real
-            if self.jugador.doble_salto_habilitado:
-                estado = "Doble Salto: Activado"
-                color = (0, 255, 0)
-            else:
-                estado = "Doble Salto: Desactivado"
-                color = (255, 0, 0)
-            if self.jugador.dash_habilitado:
-                estado_dash = "Dash: Activado"
-                color_dash = (0, 255, 0)
-            else:
-                estado_dash = "Dash: Desactivado"
-                color_dash = (255, 0, 0)
-            if self.jugador.seguimiento_camara_x:
-                estado_camara_x = "Seguimiento Camara X: Activado"
-                color_camara_x = (0, 255, 0)
-            else:
-                estado_camara_x = "Seguimiento Camara X: Desactivado"
-                color_camara_x = (255, 0, 0)
-            if self.jugador.seguimiento_camara_y:
-                estado_camara_y = "Seguimiento Camara Y: Activado"
-                color_camara_y = (0, 255, 0)
-            else:
-                estado_camara_y = "Seguimiento Camara Y: Desactivado"
-                color_camara_y = (255, 0, 0)
-
+            if not self.jugador.estoy_vivo or self.juego_pausado:
+                for item in self.pausa_items:
+                    item.dibujar(self.screen)
+            self.mostrar_datos()
             
-            pos_texto = FUENTE_PEQUENIA.render(f"X: {self.jugador.rect.x}, Y: {self.jugador.rect.y}", True, (100, 100, 100))
-            self.screen.blit(pos_texto, (10, 10)) 
-            pos_texto = FUENTE_PEQUENIA.render(f"Velocidad X: {self.jugador.velocidad_x}, Velocidad Y: {self.jugador.velocidad_y}", True, (100, 100, 100))
-            self.screen.blit(pos_texto, (10, 30))
+    def mostrar_datos(self):
+        #Mostrar almas 
+        imagen = pygame.image.load("assets/imagenes/alma/tile0.png")
+        for i in range(self.jugador.cantidad_almas):
+            self.screen.blit(imagen,( 10  * (i + 1), HEIGHT - 100) )
+        pos_texto = FUENTE_PEQUENIA.render(f"Almas :", True, (100, 100, 100))
+        self.screen.blit(pos_texto, (10, HEIGHT - 30)) 
 
-            texto_estado = FUENTE_PEQUENIA.render(estado, True, color)
-            self.screen.blit(texto_estado, (10, 50))
-            texto_estado = FUENTE_PEQUENIA.render(estado_dash, True, color_dash)
-            self.screen.blit(texto_estado, (10, 70))
+        #Mostrar almas recolectadas y totales
+
+        pos_texto = FUENTE_GRANDE.render(f" {self.jugador.cantidad_almas}/{Alma.total_almas_juego()} " , True, (255, 255, 255))
+        self.screen.blit(pos_texto, (WIDTH/2, 30)) 
+
+        #Mostrar variables
+        if self.inspeccionar_variables:
+                #Variables en tiempo real
+                if self.jugador.doble_salto_habilitado:
+                    estado = "Doble Salto: Activado"
+                    color = (0, 255, 0)
+                else:
+                    estado = "Doble Salto: Desactivado"
+                    color = (255, 0, 0)
+                if self.jugador.dash_habilitado:
+                    estado_dash = "Dash: Activado"
+                    color_dash = (0, 255, 0)
+                else:
+                    estado_dash = "Dash: Desactivado"
+                    color_dash = (255, 0, 0)
+                if self.jugador.seguimiento_camara_x:
+                    estado_camara_x = "Seguimiento Camara X: Activado"
+                    color_camara_x = (0, 255, 0)
+                else:
+                    estado_camara_x = "Seguimiento Camara X: Desactivado"
+                    color_camara_x = (255, 0, 0)
+                if self.jugador.seguimiento_camara_y:
+                    estado_camara_y = "Seguimiento Camara Y: Activado"
+                    color_camara_y = (0, 255, 0)
+                else:
+                    estado_camara_y = "Seguimiento Camara Y: Desactivado"
+                    color_camara_y = (255, 0, 0)
+
+                
+                pos_texto = FUENTE_PEQUENIA.render(f"X: {self.jugador.rect.x}, Y: {self.jugador.rect.y}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 10)) 
+                pos_texto = FUENTE_PEQUENIA.render(f"Velocidad X: {self.jugador.velocidad_x}, Velocidad Y: {self.jugador.velocidad_y}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 30))
+
+                texto_estado = FUENTE_PEQUENIA.render(estado, True, color)
+                self.screen.blit(texto_estado, (10, 50))
+                texto_estado = FUENTE_PEQUENIA.render(estado_dash, True, color_dash)
+                self.screen.blit(texto_estado, (10, 70))
 
 
-            texto_estado = FUENTE_PEQUENIA.render(estado_camara_x, True, color_camara_x)
-            self.screen.blit(texto_estado, (10, 90))
-            texto_estado = FUENTE_PEQUENIA.render(estado_camara_y, True, color_camara_y)
-            self.screen.blit(texto_estado, (10, 110))
+                texto_estado = FUENTE_PEQUENIA.render(estado_camara_x, True, color_camara_x)
+                self.screen.blit(texto_estado, (10, 90))
+                texto_estado = FUENTE_PEQUENIA.render(estado_camara_y, True, color_camara_y)
+                self.screen.blit(texto_estado, (10, 110))
 
 
-            pos_texto = FUENTE_PEQUENIA.render(f"Camara X: {self.camara.x}", True, (100, 100, 100))
-            self.screen.blit(pos_texto, (10, 130)) 
-            pos_texto = FUENTE_PEQUENIA.render(f"Camara Y: {self.camara.y}", True, (100, 100, 100))
-            self.screen.blit(pos_texto, (10, 150)) 
-            pos_texto = FUENTE_PEQUENIA.render(f"Estoy vivo: {self.jugador.estoy_vivo}", True, (100, 100, 100))
-            self.screen.blit(pos_texto, (10, 170)) 
-            pos_texto = FUENTE_PEQUENIA.render(f"Almas : {self.jugador.cantidad_almas}", True, (100, 100, 100))
-            self.screen.blit(pos_texto, (10, 190)) 
-            
-        pygame.display.flip()  
+                pos_texto = FUENTE_PEQUENIA.render(f"Camara X: {self.camara.x}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 130)) 
+                pos_texto = FUENTE_PEQUENIA.render(f"Camara Y: {self.camara.y}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 150)) 
+                pos_texto = FUENTE_PEQUENIA.render(f"Estoy vivo: {self.jugador.estoy_vivo}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 170)) 
+                pos_texto = FUENTE_PEQUENIA.render(f"Almas Jugador: {self.jugador.cantidad_almas}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 190))
+                pos_texto = FUENTE_PEQUENIA.render(f"Almas : {Alma.total_almas_juego()}", True, (100, 100, 100))
+                self.screen.blit(pos_texto, (10, 210))
     def run(self):
         while self.running:
             self.handle_events()
@@ -252,8 +310,8 @@ class Game:
             self.check_colicion_vertical()
             self.check_colicion_almas()
             self.render()
-            #self.mundo_diseño.dibujar_bg(self.screen,self.scroll)
+
             self.clock.tick(FPS)
-        
+            pygame.display.flip()  
         pygame.quit()
         sys.exit()

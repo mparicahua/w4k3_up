@@ -1,4 +1,4 @@
-from constantes import TAMANIO_PLATAFORMA
+from constantes import TAMANIO_PLATAFORMA,NUMERO_BG_PARALLAX
 class Mundo:
     def __init__(self):
         self.mapa_tiles= []
@@ -23,7 +23,7 @@ class Mundo:
                     self.mapa_tiles.append(tile_data)
     def dibujar_bg(self,screen,scroll):
         bg_width = self.bg_imagenes[0].get_width()
-        for x in range(5):
+        for x in range(NUMERO_BG_PARALLAX):
             speed = 1
             for i in self.bg_imagenes:
                 screen.blit(i, ((x * bg_width) - scroll * speed, 0))

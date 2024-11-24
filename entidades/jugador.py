@@ -21,17 +21,18 @@ class Jugador(pygame.sprite.Sprite):
         self.mirando_derecha = True
         self.cantidad_almas = 0
         self.doble_salto_disponible = True
-        self.doble_salto_habilitado = False 
+        self.doble_salto_habilitado = True 
         self.seguimiento_camara_y = True 
         self.seguimiento_camara_x = True 
         self.estoy_vivo = True
         #Pruebas dash
-        self.dash_habilitado = False
-        self.puede_dash = True
+        self.dash_habilitado = True
+        self.dash_disponible = True
         self.dash_cooldown = 0
         self.dash_duracion = 0
         self.dash_velocidad = 15
         ##########################
+        self.pausado = False
     def cargar_animacion(self):
         for nombre_animacion in self.animaciones.keys():
             for i in range(self.animaciones[nombre_animacion]["numeroFrames"]):
@@ -80,7 +81,7 @@ class Jugador(pygame.sprite.Sprite):
                     self.animaciones["parado"]["seleccionado"] = True
                     self.animaciones["dasheando"]["seleccionado"] = False
                     self.animaciones["muriendo"]["seleccionado"] = False
-            if self.puede_dash == False:
+            if self.dash_disponible == False:
                 self.imagen = self.animaciones["dasheando"]["frames"][self.animaciones["saltando"]["frameIndex"]]
                 self.animaciones["saltando"]["seleccionado"] = False
                 self.animaciones["corriendo"]["seleccionado"] = False
@@ -110,25 +111,21 @@ class Jugador(pygame.sprite.Sprite):
                 self.animaciones[nombre_animacion]["frameIndex"] = 0  
         
         ###################################################################################################################################################
-
-        if self.dash_duracion > 0:
-            self.dash_duracion -= 1
-            if self.dash_duracion <= 0:
-                self.velocidad_x = 0
-        
-
-        if self.dash_cooldown > 0:
-            self.dash_cooldown -= 1
-            if self.dash_cooldown <= 0:
-                self.puede_dash = True
-
-
-        self.velocidad_y += 0.5 
-        if self.velocidad_y > 10: 
-            self.velocidad_y = 10
+        if not self.pausado:
+            if self.dash_duracion > 0:
+                self.dash_duracion -= 1
+                if self.dash_duracion <= 0:
+                    self.velocidad_x = 0
+            if self.dash_cooldown > 0:
+                self.dash_cooldown -= 1
+                if self.dash_cooldown <= 0:
+                    self.dash_disponible = True
+            self.velocidad_y += 0.5 
+            if self.velocidad_y > 10: 
+                self.velocidad_y = 10
 
     def saltar(self):
-        if self.estoy_vivo:
+        if self.estoy_vivo and not self.pausado:
             if self.saltando == False:
                 self.velocidad_y = -10
                 self.saltando = True
@@ -136,9 +133,9 @@ class Jugador(pygame.sprite.Sprite):
                 self.velocidad_y = -10
                 self.doble_salto_disponible = False
     def ejecutar_dash(self):
-        if self.dash_habilitado and self.puede_dash and self.estoy_vivo:
+        if self.dash_habilitado and self.dash_disponible and self.estoy_vivo and not self.pausado:
             self.dash_duracion = 10
-            self.puede_dash = False
+            self.dash_disponible = False
             self.dash_cooldown = 30
             if self.mirando_derecha:
                 self.velocidad_x = self.dash_velocidad
@@ -146,12 +143,12 @@ class Jugador(pygame.sprite.Sprite):
                 self.velocidad_x = -self.dash_velocidad
             self.velocidad_y *= 0.3
     def moverIzquierda(self):
-        if self.dash_duracion <= 0 and self.estoy_vivo:
+        if self.dash_duracion <= 0 and self.estoy_vivo and not self.pausado:
             self.velocidad_x = -5
             self.mirando_derecha = False
 
     def moverDerecha(self):
-        if self.dash_duracion <= 0 and self.estoy_vivo: 
+        if self.dash_duracion <= 0 and self.estoy_vivo and not self.pausado:
             self.velocidad_x = 5
             self.mirando_derecha = True
 

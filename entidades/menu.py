@@ -1,10 +1,10 @@
 import pygame
 from constantes import GOTHIC_MENU,GRAY,GOLD
 class MenuItem:
-    def __init__(self, texto, position, callback):
+    def __init__(self, texto, posicion, callback):
         self.texto_normal = GOTHIC_MENU.render(texto, True, GRAY)
-        self.texto_seleccionado = GOTHIC_MENU.render(">"+texto, True, GOLD)
-        self.rect = self.texto_normal.get_rect(center=position)
+        self.texto_seleccionado = GOTHIC_MENU.render("> "+texto+" <", True, GOLD)
+        self.rect = self.texto_normal.get_rect(center = posicion)
         self.callback = callback
         self.seleccionado = False
 
