@@ -119,6 +119,7 @@ class Jugador(pygame.sprite.Sprite):
                 self.dash_cooldown -= 1
                 if self.dash_cooldown <= 0:
                     self.dash_disponible = True
+            #gravedad
             self.velocidad_y += 0.5 
             if self.velocidad_y > 10: 
                 self.velocidad_y = 10

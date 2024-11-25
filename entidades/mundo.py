@@ -3,7 +3,7 @@ class Mundo:
     def __init__(self):
         self.mapa_tiles= []
         self.bg_imagenes = []
-    def process_data(self, data, tile_list):
+    def procesar_data(self, data, tile_list):
         for y, row in enumerate(data):
             for x, tile in enumerate (row):
                 if tile >= 0:

@@ -29,8 +29,9 @@ class Game:
         self.punto_guardado =[575,600]
         self.inspeccionar_variables = False
         self.juego_pausado = False
+        self.juego_terminado = False
     def check_colicion_horizontal(self):
-        if not self.juego_pausado:
+        if not self.juego_pausado or not self.juego_terminado :
             self.jugador.rect.x += self.jugador.velocidad_x
         lista_coliciones_plataformas_verticales = pygame.sprite.spritecollide(self.jugador, self.plataformas, False)
         for plataforma in lista_coliciones_plataformas_verticales:
@@ -42,7 +43,7 @@ class Game:
                 self.jugador.rect.left = plataforma.rect.right
             self.jugador.velocidad_x = 0
     def check_colicion_vertical(self):
-        if not self.juego_pausado:
+        if not self.juego_pausado or  not self.juego_terminado :
             self.jugador.rect.y += self.jugador.velocidad_y
         lista_coliciones_plataformas_horizontales = pygame.sprite.spritecollide(self.jugador, self.plataformas, False)
         for plataforma in lista_coliciones_plataformas_horizontales:
@@ -69,6 +70,7 @@ class Game:
     def reiniciar_juego(self):
         self.jugador.respawnear(self.punto_guardado[0],self.punto_guardado[1])
         self.juego_pausado = False
+        self.juego_terminado = False
         self.jugador.pausado = False
         self.jugador.cantidad_almas = 0
         self.todos_sprites = pygame.sprite.Group()
@@ -124,7 +126,7 @@ class Game:
             tile_list.append(tile_image)
 
 
-        self.mundo_diseño.process_data(data_plataformas,tile_list)
+        self.mundo_diseño.procesar_data(data_plataformas,tile_list)
         self.render_plataformas()   
     def render_plataformas(self):
         Alma.cantidad_almas_juego = 0
@@ -148,6 +150,11 @@ class Game:
     def inicializar_musica(self):
         pygame.mixer.music.load("assets/musica/Other World.mp3")
         pygame.mixer.music.play(100)
+    def complete_nivel(self):
+        if Alma.total_almas_juego() == self.jugador.cantidad_almas:
+            self.jugador.pausado = True
+            self.juego_terminado = True
+            self.jugador.velocidad_y = 0
     def activar_pausa_juego(self):
         self.juego_pausado = not self.juego_pausado
         if self.juego_pausado:
@@ -194,18 +201,20 @@ class Game:
         keys = pygame.key.get_pressed()
         
         if keys[pygame.K_LEFT]:
-            if not self.juego_pausado:
+            if not self.juego_pausado or not self.juego_terminado :
                 self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
             self.jugador.moverIzquierda()
 
         if keys[pygame.K_RIGHT]:
-            if not self.juego_pausado:
+            if not self.juego_pausado or not self.juego_terminado :
                 self.scroll += (self.jugador.velocidad_x)/4 if self.scroll >= 0 else  0
             self.jugador.moverDerecha()
     def update(self):
         if self.estado_actual_pantalla == PANTALLA_JUEGO:
             self.todos_sprites.update()
             self.camara.update(self.jugador)
+        self.complete_nivel()
+
     def render(self):
         titulo_presentacion = GOTHIC_BIG.render("Wake Up", True, DARK_RED)
         mensaje_presentacion = GOTHIC_SMALL.render("Pulsa cualquier boton", True, GRAY)
@@ -240,9 +249,12 @@ class Game:
                     self.screen.blit(imagen_flip, (sprite.rect.x - self.camara.x, sprite.rect.y - self.camara.y))
                 else:
                     self.screen.blit(sprite.imagen, (sprite.rect.x  - self.camara.x, sprite.rect.y - self.camara.y))
-            if not self.jugador.estoy_vivo or self.juego_pausado:
+            if not self.jugador.estoy_vivo or self.juego_pausado or  self.juego_terminado:
                 if not self.jugador.estoy_vivo:
                     pos_texto = FUENTE_GRANDE.render(f"¡HAS MUERTO!", True, (255, 0, 0))
+                    self.screen.blit(pos_texto, (self.screen.get_width()/2 -100, self.screen.get_height()/2 - 100 ))
+                elif self.juego_terminado:
+                    pos_texto = FUENTE_GRANDE.render(f"¡HAS GANADO!", True, (0, 255, 0))
                     self.screen.blit(pos_texto, (self.screen.get_width()/2 -100, self.screen.get_height()/2 - 100 ))
                 for item in self.pausa_items:
                     item.dibujar(self.screen)
