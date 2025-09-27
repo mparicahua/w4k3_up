@@ -93,8 +93,8 @@ class Game:
     def inicializar_items_menu(self):
         items = [
             ["Nuevo Juego", (self.screen.get_width() - 200, self.screen.get_height()/2 ), self.comenzar_juego],
-            ["Opciones", (self.screen.get_width() - 200, self.screen.get_height()/2 + 100) , lambda: None],
-            ["Salir", (self.screen.get_width() - 200, self.screen.get_height()/2 + 200), self.terminar_juego]
+            # ["Opciones", (self.screen.get_width() - 200, self.screen.get_height()/2 + 100) , lambda: None],
+            ["Salir", (self.screen.get_width() - 200, self.screen.get_height()/2 + 100), self.terminar_juego]
         ]
         for i in items:
             item = MenuItem(i[0], i[1], i[2])
